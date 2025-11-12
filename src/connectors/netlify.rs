@@ -28,9 +28,9 @@ impl NetlifyConnector {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("NETLIFY_AUTH_TOKEN not configured"))?
             .clone();
-        
+
         let site_id = std::env::var("NETLIFY_SITE_ID").ok();
-        
+
         Ok(Self {
             token,
             site_id,
@@ -46,12 +46,12 @@ impl crate::connectors::Connector for NetlifyConnector {
             .site_id
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("NETLIFY_SITE_ID not set"))?;
-        
+
         let url = format!(
             "https://api.netlify.com/api/v1/accounts/{}/env/{}",
             site_id, name
         );
-        
+
         let req = UpdateEnvVarRequest {
             key: name.to_string(),
             values: vec![EnvValue {
@@ -59,7 +59,7 @@ impl crate::connectors::Connector for NetlifyConnector {
                 context: "production".to_string(),
             }],
         };
-        
+
         let response = self
             .client
             .put(&url)
@@ -67,45 +67,66 @@ impl crate::connectors::Connector for NetlifyConnector {
             .json(&req)
             .send()
             .await?;
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await?;
             anyhow::bail!("Netlify API error ({}): {}", status, text);
         }
-        
+
         Ok(())
     }
-    
-    async fn get_secret(&self, _name: &str) -> Result<String> {
-        anyhow::bail!("Netlify does not expose secret values via API")
+
+    async fn get_secret(&self, name: &str) -> Result<String> {
+        let site_id = self
+            .site_id
+            .as_ref()
+            .ok_or_else(|| anyhow::anyhow!("NETLIFY_SITE_ID not set"))?;
+
+        let url = format!("https://api.netlify.com/api/v1/accounts/{}/env", site_id);
+
+        let response = self
+            .client
+            .get(&url)
+            .bearer_auth(&self.token)
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await?;
+            anyhow::bail!("Netlify API error ({}): {}", status, text);
+        }
+
+        let json: serde_json::Value = response.json().await?;
+        if let Some(value) = json.get(name).and_then(|v| v.as_str()) {
+            Ok(value.to_string())
+        } else {
+            anyhow::bail!("Secret '{}' not found in Netlify site", name)
+        }
     }
-    
+
     async fn trigger_refresh(&self, _service: Option<&str>) -> Result<()> {
         let site_id = self
             .site_id
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("NETLIFY_SITE_ID not set"))?;
-        
-        let url = format!(
-            "https://api.netlify.com/api/v1/sites/{}/builds",
-            site_id
-        );
-        
+
+        let url = format!("https://api.netlify.com/api/v1/sites/{}/builds", site_id);
+
         let response = self
             .client
             .post(&url)
             .bearer_auth(&self.token)
             .send()
             .await?;
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await?;
             anyhow::bail!("Netlify build trigger failed ({}): {}", status, text);
         }
-        
+
         Ok(())
     }
 }
-

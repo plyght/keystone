@@ -1,13 +1,14 @@
+mod audit;
 mod cli;
 mod config;
 mod connectors;
-mod audit;
-mod lock;
-mod rotation;
+mod daemon;
 mod dev;
+mod lock;
+mod pool;
 mod prod;
 mod rollback;
-mod daemon;
+mod rotation;
 mod signals;
 
 use anyhow::Result;
@@ -25,4 +26,3 @@ async fn main() -> Result<()> {
 
     cli::run().await
 }
-

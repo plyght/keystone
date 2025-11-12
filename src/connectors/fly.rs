@@ -34,9 +34,9 @@ impl FlyConnector {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("FLY_API_TOKEN not configured"))?
             .clone();
-        
+
         let app_name = std::env::var("FLY_APP_NAME").ok();
-        
+
         Ok(Self {
             api_token,
             app_name,
@@ -52,7 +52,7 @@ impl crate::connectors::Connector for FlyConnector {
             .app_name
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("FLY_APP_NAME not set"))?;
-        
+
         let mutation = SetSecretMutation {
             query: r#"
                 mutation($appName: String!, $secrets: [SecretInput!]!) {
@@ -63,7 +63,8 @@ impl crate::connectors::Connector for FlyConnector {
                         }
                     }
                 }
-            "#.to_string(),
+            "#
+            .to_string(),
             variables: SetSecretVariables {
                 app_name: app_name.clone(),
                 secrets: vec![SecretInput {
@@ -72,7 +73,7 @@ impl crate::connectors::Connector for FlyConnector {
                 }],
             },
         };
-        
+
         let response = self
             .client
             .post("https://api.fly.io/graphql")
@@ -80,23 +81,22 @@ impl crate::connectors::Connector for FlyConnector {
             .json(&mutation)
             .send()
             .await?;
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await?;
             anyhow::bail!("Fly.io API error ({}): {}", status, text);
         }
-        
+
         Ok(())
     }
-    
+
     async fn get_secret(&self, _name: &str) -> Result<String> {
-        anyhow::bail!("Fly.io does not expose secret values via API")
+        anyhow::bail!("Fly.io secrets cannot be read via API (they are write-only for security)")
     }
-    
+
     async fn trigger_refresh(&self, _service: Option<&str>) -> Result<()> {
         println!("ℹ️  Fly.io automatically restarts apps when secrets are updated");
         Ok(())
     }
 }
-

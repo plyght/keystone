@@ -1,25 +1,28 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default = "default_audit_log_path")]
     pub audit_log_path: PathBuf,
-    
+
     #[serde(default = "default_cooldown_seconds")]
     pub cooldown_seconds: u64,
-    
+
     #[serde(default = "default_rollback_window_seconds")]
     pub rollback_window_seconds: u64,
-    
+
     #[serde(default = "default_daemon_bind")]
     pub daemon_bind: String,
-    
+
+    #[serde(default = "default_pool_low_threshold")]
+    pub pool_low_threshold: u64,
+
     #[serde(default)]
     pub maintenance_windows: Vec<MaintenanceWindow>,
-    
+
     #[serde(default)]
     pub connector_auth: ConnectorAuth,
 }
@@ -66,6 +69,10 @@ fn default_daemon_bind() -> String {
     "127.0.0.1:9123".to_string()
 }
 
+fn default_pool_low_threshold() -> u64 {
+    2
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -73,6 +80,7 @@ impl Default for Config {
             cooldown_seconds: default_cooldown_seconds(),
             rollback_window_seconds: default_rollback_window_seconds(),
             daemon_bind: default_daemon_bind(),
+            pool_low_threshold: default_pool_low_threshold(),
             maintenance_windows: Vec::new(),
             connector_auth: ConnectorAuth::default(),
         }
@@ -82,34 +90,33 @@ impl Default for Config {
 impl Config {
     pub fn load() -> Result<Self> {
         let config_path = Self::config_path();
-        
+
         if !config_path.exists() {
             return Ok(Self::default());
         }
-        
-        let contents = fs::read_to_string(&config_path)
-            .context("Failed to read config file")?;
-        let mut config: Config = toml::from_str(&contents)
-            .context("Failed to parse config file")?;
-        
+
+        let contents = fs::read_to_string(&config_path).context("Failed to read config file")?;
+        let mut config: Config =
+            toml::from_str(&contents).context("Failed to parse config file")?;
+
         config.apply_env_overrides();
-        
+
         Ok(config)
     }
-    
+
     pub fn save(&self) -> Result<()> {
         let config_path = Self::config_path();
-        
+
         if let Some(parent) = config_path.parent() {
             fs::create_dir_all(parent)?;
         }
-        
+
         let contents = toml::to_string_pretty(self)?;
         fs::write(&config_path, contents)?;
-        
+
         Ok(())
     }
-    
+
     pub fn config_path() -> PathBuf {
         std::env::var("BIRCH_CONFIG_PATH")
             .map(PathBuf::from)
@@ -120,78 +127,84 @@ impl Config {
                     .join("config.toml")
             })
     }
-    
+
     pub fn birch_dir() -> PathBuf {
         dirs::home_dir()
             .unwrap_or_else(|| PathBuf::from("."))
             .join(".birch")
     }
-    
+
     fn apply_env_overrides(&mut self) {
         if let Ok(path) = std::env::var("BIRCH_AUDIT_LOG_PATH") {
             self.audit_log_path = PathBuf::from(path);
         }
-        
+
         if let Ok(val) = std::env::var("BIRCH_COOLDOWN_SECONDS") {
             if let Ok(seconds) = val.parse() {
                 self.cooldown_seconds = seconds;
             }
         }
-        
+
         if let Ok(val) = std::env::var("BIRCH_ROLLBACK_WINDOW_SECONDS") {
             if let Ok(seconds) = val.parse() {
                 self.rollback_window_seconds = seconds;
             }
         }
-        
+
         if let Ok(val) = std::env::var("BIRCH_DAEMON_BIND") {
             self.daemon_bind = val;
         }
-        
+
+        if let Ok(val) = std::env::var("BIRCH_POOL_LOW_THRESHOLD") {
+            if let Ok(threshold) = val.parse() {
+                self.pool_low_threshold = threshold;
+            }
+        }
+
         if let Ok(val) = std::env::var("VERCEL_TOKEN") {
             self.connector_auth.vercel_token = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("NETLIFY_AUTH_TOKEN") {
             self.connector_auth.netlify_auth_token = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("RENDER_API_KEY") {
             self.connector_auth.render_api_key = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("CLOUDFLARE_API_TOKEN") {
             self.connector_auth.cloudflare_api_token = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("FLY_API_TOKEN") {
             self.connector_auth.fly_api_token = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AWS_ACCESS_KEY_ID") {
             self.connector_auth.aws_access_key_id = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AWS_SECRET_ACCESS_KEY") {
             self.connector_auth.aws_secret_access_key = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AWS_REGION") {
             self.connector_auth.aws_region = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("GOOGLE_APPLICATION_CREDENTIALS") {
             self.connector_auth.gcp_credentials_path = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AZURE_CLIENT_ID") {
             self.connector_auth.azure_client_id = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AZURE_CLIENT_SECRET") {
             self.connector_auth.azure_client_secret = Some(val);
         }
-        
+
         if let Ok(val) = std::env::var("AZURE_TENANT_ID") {
             self.connector_auth.azure_tenant_id = Some(val);
         }
@@ -206,15 +219,14 @@ pub async fn show_config() -> Result<()> {
 
 pub async fn init_config() -> Result<()> {
     let config_path = Config::config_path();
-    
+
     if config_path.exists() {
         anyhow::bail!("Config file already exists at: {}", config_path.display());
     }
-    
+
     let config = Config::default();
     config.save()?;
-    
+
     println!("Initialized config at: {}", config_path.display());
     Ok(())
 }
-

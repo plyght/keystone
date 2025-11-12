@@ -42,6 +42,14 @@ uuid = { version = "1.10", features = ["v4", "serde"] }
 dialoguer = "0.11"
 dirs = "5.0"
 async-trait = "0.1"
+chacha20poly1305 = "0.10"
+aws-config = { version = "1.1", features = ["behavior-version-latest"] }
+aws-sdk-secretsmanager = "1.13"
+google-secretmanager1 = "5.0"
+azure_core = "0.20"
+azure_security_keyvault = "0.20"
+azure_identity = "0.20"
+base64 = "0.22"
 
 [dev-dependencies]
 tempfile = "3.12"

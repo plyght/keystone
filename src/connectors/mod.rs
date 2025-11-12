@@ -1,14 +1,14 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-pub mod vercel;
-pub mod netlify;
-pub mod render;
+pub mod aws;
+pub mod azure;
 pub mod cloudflare;
 pub mod fly;
-pub mod aws;
 pub mod gcp;
-pub mod azure;
+pub mod netlify;
+pub mod render;
+pub mod vercel;
 
 #[async_trait]
 pub trait Connector: Send + Sync {
@@ -24,4 +24,3 @@ pub fn mask_secret(secret: &str) -> String {
         format!("***{}", &secret[secret.len() - 4..])
     }
 }
-
