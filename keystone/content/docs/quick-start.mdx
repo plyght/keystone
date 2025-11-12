@@ -1,0 +1,141 @@
+---
+title: Quick Start
+description: Get started with Keystone in 5 minutes
+---
+
+# Quick Start
+
+This guide will help you perform your first secret rotation in both development and production environments.
+
+## Prerequisites
+
+- Keystone installed ([Installation Guide](/docs/installation))
+- Access to a `.env` file (for dev mode) or provider credentials (for prod mode)
+
+## Initialize Configuration
+
+First, create the default configuration:
+
+```bash
+keystone config init
+```
+
+This creates `~/.keystone/config.toml` with default settings.
+
+## Dev Mode: Rotate a Secret in .env
+
+Rotate a secret in your local `.env` file:
+
+```bash
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Rotate a secret
+keystone rotate MY_API_KEY --env dev
+```
+
+This will:
+1. Update `MY_API_KEY` in your `.env` file
+2. Save a rollback copy to `.keystone-rollback`
+3. Display the new masked value
+
+### Restart Your Application
+
+After rotation, restart your application to use the new secret:
+
+```bash
+npm run dev  # or your start command
+```
+
+### Rollback if Needed
+
+If something goes wrong, rollback to the previous value:
+
+```bash
+keystone rollback MY_API_KEY --env dev
+```
+
+## Production Mode: Rotate on Vercel
+
+For production, you'll need provider credentials. Let's rotate a Vercel secret:
+
+### 1. Set Up Credentials
+
+```bash
+export VERCEL_TOKEN="your-vercel-token"
+export VERCEL_PROJECT_ID="your-project-id"
+```
+
+### 2. Dry Run First
+
+Always test with `--dry-run` before making real changes:
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel --dry-run
+```
+
+### 3. Perform Rotation
+
+When you're ready:
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel
+```
+
+You'll be prompted to confirm the change.
+
+### 4. Optional: Trigger Redeploy
+
+To automatically redeploy after rotation:
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel --redeploy
+```
+
+## Set Up the Daemon (Optional)
+
+For app-signal rotation, start the background daemon:
+
+```bash
+keystone daemon start
+```
+
+Now your application can trigger rotations automatically:
+
+```bash
+curl -X POST http://127.0.0.1:9123/rotate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "secret_name": "MY_API_KEY",
+    "env": "prod",
+    "service": "vercel"
+  }'
+```
+
+Check daemon status:
+
+```bash
+keystone daemon status
+```
+
+## View Audit Logs
+
+Check the history of rotations:
+
+```bash
+# All recent rotations
+keystone audit --last 10
+
+# Specific secret
+keystone audit MY_API_KEY --env prod
+```
+
+## Next Steps
+
+Now that you've completed your first rotation:
+
+- [Learn about configuration options](/docs/configuration)
+- [Set up multiple providers](/docs/connectors)
+- [Read the operator runbook](/docs/operators/runbook)
+- [Implement app-signal rotation](/docs/usage/app-signals)
+

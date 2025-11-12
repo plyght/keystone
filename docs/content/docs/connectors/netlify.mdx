@@ -1,0 +1,75 @@
+---
+title: Netlify Connector
+description: Rotate secrets on Netlify
+---
+
+Rotate environment variables on Netlify sites.
+
+## Prerequisites
+
+- Netlify account with a site
+- Netlify personal access token
+
+## Setup
+
+### 1. Get Your Netlify Token
+
+Create a personal access token at [Netlify User Settings → Applications](https://app.netlify.com/user/applications).
+
+### 2. Find Your Site ID
+
+```bash
+# From Netlify CLI
+netlify sites:list
+
+# Or from site settings:
+# https://app.netlify.com/sites/your-site/settings/general
+```
+
+### 3. Configure Credentials
+
+```bash
+export NETLIFY_AUTH_TOKEN="your-netlify-token"
+export NETLIFY_SITE_ID="your-site-id"
+```
+
+## Usage
+
+```bash
+# Rotate a secret
+keystone rotate MY_API_KEY --env prod --service netlify
+
+# With automatic build trigger
+keystone rotate MY_API_KEY --env prod --service netlify --redeploy
+```
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Update secret | ✅ Yes |
+| Get secret value | ❌ No (API limitation) |
+| Trigger build | ✅ Yes |
+
+## Environment Contexts
+
+Netlify supports multiple environment contexts. By default, Keystone updates the **production** context.
+
+## Troubleshooting
+
+### "NETLIFY_AUTH_TOKEN not configured"
+
+Ensure the token is set:
+
+```bash
+echo $NETLIFY_AUTH_TOKEN
+```
+
+### "NETLIFY_SITE_ID not set"
+
+Set the site ID:
+
+```bash
+export NETLIFY_SITE_ID="abc123..."
+```
+

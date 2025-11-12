@@ -1,0 +1,99 @@
+---
+title: Connectors
+description: Provider integrations for secret rotation
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card';
+
+Keystone supports multiple hosting providers and cloud secret managers through its connector architecture.
+
+## Hosting Providers
+
+<Cards>
+  <Card title="Vercel" href="/docs/connectors/vercel" />
+  <Card title="Netlify" href="/docs/connectors/netlify" />
+  <Card title="Render" href="/docs/connectors/render" />
+  <Card title="Cloudflare Workers" href="/docs/connectors/cloudflare" />
+  <Card title="Fly.io" href="/docs/connectors/fly" />
+</Cards>
+
+## Cloud Secret Managers
+
+<Cards>
+  <Card title="AWS Secrets Manager" href="/docs/connectors/aws" />
+  <Card title="GCP Secret Manager" href="/docs/connectors/gcp" />
+  <Card title="Azure Key Vault" href="/docs/connectors/azure" />
+</Cards>
+
+## Common Setup
+
+All connectors require authentication credentials. You can provide them via:
+
+1. **Environment variables** (recommended for CI/CD)
+2. **Configuration file** (`~/.keystone/config.toml`)
+
+### Environment Variables
+
+```bash
+export VERCEL_TOKEN="your-token"
+export NETLIFY_AUTH_TOKEN="your-token"
+export RENDER_API_KEY="your-api-key"
+# etc...
+```
+
+### Configuration File
+
+```toml
+[connector_auth]
+vercel_token = "your-token"
+netlify_auth_token = "your-token"
+render_api_key = "your-api-key"
+```
+
+## Usage Pattern
+
+All connectors follow the same usage pattern:
+
+```bash
+# Rotate a secret
+keystone rotate SECRET_NAME --env ENV --service PROVIDER
+
+# With redeploy
+keystone rotate SECRET_NAME --env ENV --service PROVIDER --redeploy
+
+# Dry run first
+keystone rotate SECRET_NAME --env ENV --service PROVIDER --dry-run
+```
+
+## Connector Status
+
+| Provider | Status | Secret Update | Get Secret | Auto-Redeploy |
+|----------|--------|---------------|------------|---------------|
+| Vercel | ✅ Ready | ✅ | ❌ | ✅ |
+| Netlify | ✅ Ready | ✅ | ❌ | ✅ |
+| Render | ✅ Ready | ✅ | ❌ | ✅ |
+| Cloudflare | ✅ Ready | ✅ | ❌ | N/A* |
+| Fly.io | ✅ Ready | ✅ | ❌ | Auto** |
+| AWS | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
+| GCP | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
+| Azure | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
+
+\* Cloudflare Workers automatically use updated secrets on next invocation  
+\** Fly.io automatically restarts apps when secrets are updated
+
+## Notes
+
+- Most providers don't expose secret values via API for security
+- AWS/GCP/Azure connectors require native SDKs (placeholder implementations included)
+- Each provider has specific environment variable requirements
+
+## Next Steps
+
+Choose your provider and follow the setup guide:
+
+<Cards>
+  <Card title="Vercel Setup" href="/docs/connectors/vercel" />
+  <Card title="Netlify Setup" href="/docs/connectors/netlify" />
+  <Card title="Render Setup" href="/docs/connectors/render" />
+</Cards>
+

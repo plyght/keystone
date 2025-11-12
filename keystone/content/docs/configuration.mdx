@@ -1,0 +1,187 @@
+---
+title: Configuration
+description: Configure Keystone for your environment
+---
+
+# Configuration
+
+Keystone uses a TOML configuration file with environment variable overrides for flexibility.
+
+## Configuration File
+
+The default configuration file is located at `~/.keystone/config.toml`.
+
+### Initialize
+
+Create the default configuration:
+
+```bash
+keystone config init
+```
+
+### View Current Configuration
+
+Display the active configuration:
+
+```bash
+keystone config show
+```
+
+## Configuration Options
+
+### Basic Settings
+
+```toml
+# Where to store audit logs
+audit_log_path = "/Users/you/.keystone/logs"
+
+# Minimum time between rotations (seconds)
+cooldown_seconds = 60
+
+# Time window to allow rollbacks (seconds)
+rollback_window_seconds = 3600
+
+# Daemon bind address
+daemon_bind = "127.0.0.1:9123"
+```
+
+### Maintenance Windows
+
+Define time windows when production rotations are allowed:
+
+```toml
+[[maintenance_windows]]
+start_hour = 2
+end_hour = 6
+days = ["Saturday", "Sunday"]
+
+[[maintenance_windows]]
+start_hour = 14
+end_hour = 16
+days = ["Wednesday"]
+```
+
+### Connector Authentication
+
+Store provider credentials in config (optional):
+
+```toml
+[connector_auth]
+vercel_token = "your-token"
+netlify_auth_token = "your-token"
+render_api_key = "your-key"
+cloudflare_api_token = "your-token"
+fly_api_token = "your-token"
+aws_access_key_id = "your-key"
+aws_secret_access_key = "your-secret"
+aws_region = "us-east-1"
+gcp_credentials_path = "/path/to/credentials.json"
+azure_client_id = "your-client-id"
+azure_client_secret = "your-secret"
+azure_tenant_id = "your-tenant"
+```
+
+## Environment Variables
+
+Environment variables take precedence over config file settings:
+
+### Core Settings
+
+```bash
+export KEYSTONE_AUDIT_LOG_PATH="/var/log/keystone"
+export KEYSTONE_COOLDOWN_SECONDS=30
+export KEYSTONE_ROLLBACK_WINDOW_SECONDS=7200
+export KEYSTONE_DAEMON_BIND="0.0.0.0:9123"
+```
+
+### Vercel
+
+```bash
+export VERCEL_TOKEN="your-token"
+export VERCEL_PROJECT_ID="your-project-id"
+```
+
+### Netlify
+
+```bash
+export NETLIFY_AUTH_TOKEN="your-token"
+export NETLIFY_SITE_ID="your-site-id"
+```
+
+### Render
+
+```bash
+export RENDER_API_KEY="your-api-key"
+export RENDER_SERVICE_ID="your-service-id"
+```
+
+### Cloudflare Workers
+
+```bash
+export CLOUDFLARE_API_TOKEN="your-token"
+export CLOUDFLARE_ACCOUNT_ID="your-account-id"
+export CLOUDFLARE_WORKER_NAME="your-worker"
+```
+
+### Fly.io
+
+```bash
+export FLY_API_TOKEN="your-token"
+export FLY_APP_NAME="your-app"
+```
+
+### AWS
+
+```bash
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export AWS_REGION="us-east-1"
+```
+
+### GCP
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/creds.json"
+export GCP_PROJECT_ID="your-project"
+```
+
+### Azure
+
+```bash
+export AZURE_CLIENT_ID="your-client-id"
+export AZURE_CLIENT_SECRET="your-secret"
+export AZURE_TENANT_ID="your-tenant"
+export AZURE_VAULT_NAME="your-vault"
+```
+
+## Configuration Precedence
+
+Settings are applied in this order (later overrides earlier):
+
+1. Default values
+2. Config file (`~/.keystone/config.toml`)
+3. Environment variables
+
+## Custom Config Path
+
+Override the config file location:
+
+```bash
+export KEYSTONE_CONFIG_PATH="/path/to/custom/config.toml"
+keystone config show
+```
+
+## Security Best Practices
+
+- **Never commit credentials** to version control
+- **Use environment variables** in CI/CD pipelines
+- **Restrict config file permissions**: `chmod 600 ~/.keystone/config.toml`
+- **Rotate Keystone's own credentials** regularly
+- **Use different credentials** per environment
+
+## Next Steps
+
+- [Learn about available connectors](/docs/connectors)
+- [Understand the rotation workflow](/docs/usage/rotation)
+- [Set up production deployment](/docs/operators/runbook)
+

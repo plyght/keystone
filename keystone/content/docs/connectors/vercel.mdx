@@ -1,0 +1,124 @@
+---
+title: Vercel Connector
+description: Rotate secrets on Vercel
+---
+
+# Vercel Connector
+
+Rotate environment variables and secrets on Vercel projects.
+
+## Prerequisites
+
+- Vercel account with a project
+- Vercel API token with appropriate permissions
+
+## Setup
+
+### 1. Get Your Vercel Token
+
+Create an API token at [Vercel Settings → Tokens](https://vercel.com/account/tokens).
+
+### 2. Find Your Project ID
+
+```bash
+# Using Vercel CLI
+vercel project ls
+
+# Or from Vercel dashboard URL:
+# https://vercel.com/your-team/your-project/settings
+# Project ID is in the settings page
+```
+
+### 3. Configure Credentials
+
+**Option A: Environment Variables (Recommended)**
+
+```bash
+export VERCEL_TOKEN="your-vercel-token"
+export VERCEL_PROJECT_ID="your-project-id"
+```
+
+**Option B: Configuration File**
+
+```toml
+[connector_auth]
+vercel_token = "your-vercel-token"
+```
+
+And set project ID via environment:
+
+```bash
+export VERCEL_PROJECT_ID="your-project-id"
+```
+
+## Usage
+
+### Rotate a Secret
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel
+```
+
+### With Automatic Redeploy
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel --redeploy
+```
+
+### Dry Run
+
+```bash
+keystone rotate MY_API_KEY --env prod --service vercel --dry-run
+```
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Update secret | ✅ Yes |
+| Get secret value | ❌ No (API limitation) |
+| Trigger redeploy | ✅ Yes |
+| Multiple environments | ✅ Yes (production/preview/development) |
+
+## Environment Targeting
+
+Keystone updates secrets for the **production** environment by default.
+
+To target different environments, modify the connector implementation or use Vercel's environment-specific secrets.
+
+## Limitations
+
+- Vercel API doesn't expose secret values for security reasons
+- Rollback requires storing previous values separately
+
+## Troubleshooting
+
+### "VERCEL_TOKEN not configured"
+
+Ensure the token is set:
+
+```bash
+echo $VERCEL_TOKEN
+```
+
+### "VERCEL_PROJECT_ID not set"
+
+Set the project ID:
+
+```bash
+export VERCEL_PROJECT_ID="prj_abc123..."
+```
+
+### API Errors
+
+Check:
+- Token has correct permissions
+- Project ID is correct
+- Token hasn't expired
+
+## Next Steps
+
+- [Configure automatic rotation](/docs/usage/app-signals)
+- [Set up the daemon](/docs/operators/runbook#daemon-setup)
+- [Learn about rollback procedures](/docs/usage/rollback)
+
