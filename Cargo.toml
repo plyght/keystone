@@ -1,0 +1,53 @@
+[package]
+name = "keystone"
+version = "0.1.0"
+edition = "2021"
+authors = ["Keystone Contributors"]
+description = "Lease. Rotate. Prove. - Secret rotation tool for local .env and production hosts"
+license = "MIT"
+repository = "https://github.com/keystone/keystone"
+
+[lib]
+name = "keystone"
+path = "src/lib.rs"
+
+[[bin]]
+name = "keystone"
+path = "src/main.rs"
+
+[[example]]
+name = "app_signal_hook"
+path = "examples/app_signal_hook.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+reqwest = { version = "0.12", features = ["json"] }
+dotenv = "0.15"
+ed25519-dalek = { version = "2.1", features = ["serde"] }
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+hex = "0.4"
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace"] }
+uuid = { version = "1.10", features = ["v4", "serde"] }
+dialoguer = "0.11"
+dirs = "5.0"
+async-trait = "0.1"
+
+[dev-dependencies]
+tempfile = "3.12"
+mockito = "1.5"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

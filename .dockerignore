@@ -1,0 +1,11 @@
+target/
+.git/
+.gitignore
+*.md
+!README.md
+.env
+.env.*
+.keystone/
+.DS_Store
+*.swp
+

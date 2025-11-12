@@ -1,0 +1,221 @@
+use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
+use ed25519_dalek::{SigningKey, VerifyingKey, Signature, Signer, Verifier};
+use rand::rngs::OsRng;
+use rand::RngCore;
+use serde::{Deserialize, Serialize};
+use std::fs::{self, OpenOptions};
+use std::io::Write;
+use std::path::PathBuf;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuditEntry {
+    pub timestamp: DateTime<Utc>,
+    pub actor: String,
+    pub secret_name: String,
+    pub env: String,
+    pub service: Option<String>,
+    pub action: AuditAction,
+    pub success: bool,
+    pub masked_secret_preview: Option<String>,
+    pub signature: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AuditAction {
+    Rotate,
+    Rollback,
+    Signal,
+}
+
+pub struct AuditLogger {
+    signing_key: SigningKey,
+    verifying_key: VerifyingKey,
+    log_path: PathBuf,
+}
+
+impl AuditLogger {
+    pub fn new() -> Result<Self> {
+        let config = crate::config::Config::load()?;
+        let keystone_dir = crate::config::Config::keystone_dir();
+        let signing_key_path = keystone_dir.join("signing-key");
+        
+        fs::create_dir_all(&keystone_dir)?;
+        fs::create_dir_all(&config.audit_log_path)?;
+        
+        let (signing_key, verifying_key) = if signing_key_path.exists() {
+            let key_bytes = fs::read(&signing_key_path)?;
+            let key_array: [u8; 32] = key_bytes[..32].try_into()
+                .context("Invalid signing key length")?;
+            let signing_key = SigningKey::from_bytes(&key_array);
+            let verifying_key = signing_key.verifying_key();
+            (signing_key, verifying_key)
+        } else {
+            let mut secret_bytes = [0u8; 32];
+            OsRng.fill_bytes(&mut secret_bytes);
+            let signing_key = SigningKey::from_bytes(&secret_bytes);
+            let verifying_key = signing_key.verifying_key();
+            fs::write(&signing_key_path, signing_key.to_bytes())?;
+            (signing_key, verifying_key)
+        };
+        
+        Ok(Self {
+            signing_key,
+            verifying_key,
+            log_path: config.audit_log_path,
+        })
+    }
+    
+    pub fn log(
+        &self,
+        secret_name: String,
+        env: String,
+        service: Option<String>,
+        action: AuditAction,
+        success: bool,
+        masked_secret_preview: Option<String>,
+    ) -> Result<()> {
+        let actor = std::env::var("USER")
+            .or_else(|_| std::env::var("USERNAME"))
+            .unwrap_or_else(|_| "unknown".to_string());
+        
+        let entry = AuditEntry {
+            timestamp: Utc::now(),
+            actor,
+            secret_name,
+            env,
+            service,
+            action,
+            success,
+            masked_secret_preview,
+            signature: String::new(),
+        };
+        
+        let entry_json = serde_json::to_string(&entry)?;
+        let signature = self.signing_key.sign(entry_json.as_bytes());
+        
+        let mut entry_with_sig = entry;
+        entry_with_sig.signature = hex::encode(signature.to_bytes());
+        
+        let log_file = self.log_path.join(format!(
+            "keystone-{}.log",
+            Utc::now().format("%Y-%m-%d")
+        ));
+        
+        let mut file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(log_file)?;
+        
+        writeln!(file, "{}", serde_json::to_string(&entry_with_sig)?)?;
+        
+        Ok(())
+    }
+    
+    pub fn verify_entry(&self, entry: &AuditEntry) -> Result<bool> {
+        let sig_bytes = hex::decode(&entry.signature)?;
+        let sig_array: [u8; 64] = sig_bytes.try_into()
+            .map_err(|_| anyhow::anyhow!("Invalid signature length"))?;
+        let signature = Signature::from_bytes(&sig_array);
+        
+        let mut entry_without_sig = entry.clone();
+        entry_without_sig.signature = String::new();
+        let entry_json = serde_json::to_string(&entry_without_sig)?;
+        
+        Ok(self.verifying_key.verify(entry_json.as_bytes(), &signature).is_ok())
+    }
+    
+    pub fn read_logs(
+        &self,
+        secret_name: Option<String>,
+        env: Option<String>,
+        last: Option<usize>,
+    ) -> Result<Vec<AuditEntry>> {
+        let mut entries = Vec::new();
+        
+        if !self.log_path.exists() {
+            return Ok(entries);
+        }
+        
+        for entry in fs::read_dir(&self.log_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            
+            if path.extension().and_then(|s| s.to_str()) != Some("log") {
+                continue;
+            }
+            
+            let contents = fs::read_to_string(&path)?;
+            for line in contents.lines() {
+                if line.trim().is_empty() {
+                    continue;
+                }
+                
+                let audit_entry: AuditEntry = serde_json::from_str(line)?;
+                
+                if let Some(ref name) = secret_name {
+                    if audit_entry.secret_name != *name {
+                        continue;
+                    }
+                }
+                
+                if let Some(ref e) = env {
+                    if audit_entry.env != *e {
+                        continue;
+                    }
+                }
+                
+                entries.push(audit_entry);
+            }
+        }
+        
+        entries.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        
+        if let Some(n) = last {
+            entries.truncate(n);
+        }
+        
+        Ok(entries)
+    }
+}
+
+pub async fn show_audit(
+    secret_name: Option<String>,
+    env: Option<String>,
+    last: Option<usize>,
+) -> Result<()> {
+    let logger = AuditLogger::new()?;
+    let entries = logger.read_logs(secret_name, env, last)?;
+    
+    if entries.is_empty() {
+        println!("No audit entries found");
+        return Ok(());
+    }
+    
+    for entry in entries {
+        println!("─────────────────────────────────────");
+        println!("Time: {}", entry.timestamp.format("%Y-%m-%d %H:%M:%S UTC"));
+        println!("Actor: {}", entry.actor);
+        println!("Action: {:?}", entry.action);
+        println!("Secret: {}", entry.secret_name);
+        println!("Env: {}", entry.env);
+        if let Some(ref service) = entry.service {
+            println!("Service: {}", service);
+        }
+        println!("Success: {}", entry.success);
+        if let Some(ref preview) = entry.masked_secret_preview {
+            println!("Preview: {}", preview);
+        }
+        
+        let verified = logger.verify_entry(&entry)?;
+        println!("Signature: {} ({})", 
+            &entry.signature[..16],
+            if verified { "✓ valid" } else { "✗ invalid" }
+        );
+    }
+    println!("─────────────────────────────────────");
+    
+    Ok(())
+}
+

@@ -1,0 +1,413 @@
+# Keystone Incident Response Checklist
+
+This checklist provides step-by-step procedures for responding to incidents related to secret rotation.
+
+## Incident Types
+
+1. [Compromised Secret](#compromised-secret)
+2. [Failed Rotation](#failed-rotation)
+3. [Application Outage After Rotation](#application-outage-after-rotation)
+4. [Daemon Failure](#daemon-failure)
+5. [Lost Audit Logs](#lost-audit-logs)
+
+---
+
+## Compromised Secret
+
+**Severity**: CRITICAL
+
+**Trigger**: Secret has been exposed (e.g., committed to git, logged, publicly accessible)
+
+### Immediate Response (0-5 minutes)
+
+- [ ] **Alert security team**
+- [ ] **Start incident timeline** (document all actions with timestamps)
+- [ ] **Assess scope**: Which secret(s)? Which environment(s)?
+- [ ] **Determine exposure window**: When was secret compromised?
+
+### Containment (5-15 minutes)
+
+- [ ] **Rotate compromised secret immediately**:
+
+```bash
+keystone rotate <SECRET_NAME> --env prod --service <SERVICE> --redeploy
+```
+
+- [ ] **For multiple environments**, rotate in parallel:
+
+```bash
+keystone rotate <SECRET_NAME> --env staging --service <SERVICE> &
+keystone rotate <SECRET_NAME> --env prod --service <SERVICE> --redeploy &
+wait
+```
+
+- [ ] **Verify rotation** in audit logs:
+
+```bash
+keystone audit <SECRET_NAME> --last 5
+```
+
+### Revocation (15-30 minutes)
+
+- [ ] **Revoke old secret at provider**:
+  - Log into provider console
+  - Delete/revoke the compromised key
+  - Document revocation timestamp
+
+- [ ] **Check for unauthorized access**:
+  - Review provider access logs
+  - Look for suspicious API calls
+  - Document any anomalies
+
+### Recovery (30-60 minutes)
+
+- [ ] **Verify application health**:
+  - Check monitoring dashboards
+  - Review application logs
+  - Test critical functionality
+
+- [ ] **Confirm new secret is working**:
+  - Make test API calls
+  - Verify expected behavior
+
+- [ ] **Document incident**:
+  - Timeline of events
+  - Actions taken
+  - Impact assessment
+
+### Post-Incident (1+ hours)
+
+- [ ] **Root cause analysis**:
+  - How was secret exposed?
+  - What controls failed?
+  - What process changes are needed?
+
+- [ ] **Implement preventive measures**:
+  - Update pre-commit hooks
+  - Add secret scanning
+  - Update developer training
+
+- [ ] **Complete incident report**
+
+---
+
+## Failed Rotation
+
+**Severity**: HIGH
+
+**Trigger**: Rotation command fails or times out
+
+### Immediate Response (0-5 minutes)
+
+- [ ] **Check error message**:
+
+```bash
+keystone audit <SECRET_NAME> --env <ENV> --last 1
+```
+
+- [ ] **Identify failure type**:
+  - Lock held? → Wait or remove stale lock
+  - Cooldown active? → Wait for cooldown expiration
+  - Provider API error? → Check provider status
+  - Network error? → Check connectivity
+
+### Diagnosis (5-15 minutes)
+
+For **Lock Held** errors:
+
+- [ ] Check lock status:
+
+```bash
+ls -la ~/.keystone/locks/
+```
+
+- [ ] Verify if holder process is running:
+
+```bash
+ps aux | grep <PID>
+```
+
+- [ ] Remove stale lock if process is dead:
+
+```bash
+rm ~/.keystone/locks/<env>-<secret_name>.lock
+```
+
+For **Provider API** errors:
+
+- [ ] Check provider status page
+- [ ] Verify credentials:
+
+```bash
+env | grep <PROVIDER>_TOKEN
+```
+
+- [ ] Test provider API directly (curl/browser)
+
+For **Network** errors:
+
+- [ ] Check network connectivity
+- [ ] Verify DNS resolution
+- [ ] Check firewall rules
+
+### Resolution (15-30 minutes)
+
+- [ ] **Retry rotation** after resolving issue:
+
+```bash
+keystone rotate <SECRET_NAME> --env <ENV> --service <SERVICE>
+```
+
+- [ ] **Monitor for success**
+
+- [ ] **If repeated failures**:
+  - Consider manual rotation via provider console
+  - Update Keystone config/credentials
+  - File bug report
+
+### Post-Incident
+
+- [ ] **Review audit logs** for pattern of failures
+- [ ] **Update monitoring** to detect similar issues
+- [ ] **Document resolution** for runbook
+
+---
+
+## Application Outage After Rotation
+
+**Severity**: CRITICAL
+
+**Trigger**: Application stops working immediately after secret rotation
+
+### Immediate Response (0-2 minutes)
+
+- [ ] **Confirm timing**: Did outage start immediately after rotation?
+- [ ] **Check application health**:
+  - Error rate spike?
+  - Authentication failures?
+  - Specific endpoints affected?
+
+### Rollback (2-10 minutes)
+
+- [ ] **Rollback secret immediately**:
+
+```bash
+keystone rollback <SECRET_NAME> --env <ENV> --service <SERVICE> --redeploy
+```
+
+- [ ] **Monitor application recovery**
+- [ ] **If outside rollback window**, manually restore old secret
+
+### Verification (10-20 minutes)
+
+- [ ] **Confirm application is healthy**:
+  - Error rate returned to normal
+  - All endpoints functional
+  - No customer impact
+
+- [ ] **Review what went wrong**:
+  - Was new secret malformed?
+  - Did application fail to reload?
+  - Was there a provider-side delay?
+
+### Root Cause Analysis (20-60 minutes)
+
+- [ ] **Check new secret value**:
+  - Was it generated correctly?
+  - Does it meet provider requirements?
+
+- [ ] **Review application logs**:
+  - How did application handle new secret?
+  - Any error messages?
+
+- [ ] **Test rotation in dev/staging**:
+
+```bash
+keystone rotate <SECRET_NAME> --env dev
+```
+
+- [ ] **Identify fix**:
+  - Application code change needed?
+  - Keystone configuration issue?
+  - Provider-specific requirement?
+
+### Resolution
+
+- [ ] **Fix underlying issue**
+- [ ] **Test in dev/staging thoroughly**
+- [ ] **Retry rotation** in production when safe
+- [ ] **Document incident and fix**
+
+---
+
+## Daemon Failure
+
+**Severity**: MEDIUM
+
+**Trigger**: Keystone daemon stops responding or crashes
+
+### Immediate Response (0-5 minutes)
+
+- [ ] **Check daemon status**:
+
+```bash
+keystone daemon status
+```
+
+- [ ] **Check for process**:
+
+```bash
+ps aux | grep keystone
+```
+
+- [ ] **Test health endpoint**:
+
+```bash
+curl http://127.0.0.1:9123/health
+```
+
+### Diagnosis (5-15 minutes)
+
+- [ ] **Review daemon logs**:
+
+```bash
+tail -100 ~/.keystone/daemon.log
+```
+
+Or if using systemd:
+
+```bash
+sudo journalctl -u keystone -n 100
+```
+
+- [ ] **Check for common issues**:
+  - Out of memory?
+  - Disk full?
+  - Port conflict?
+  - Crash/panic?
+
+- [ ] **Check PID file**:
+
+```bash
+cat ~/.keystone/daemon.pid
+```
+
+### Recovery (15-30 minutes)
+
+- [ ] **Clean up stale state**:
+
+```bash
+rm ~/.keystone/daemon.pid
+```
+
+- [ ] **Restart daemon**:
+
+```bash
+keystone daemon start
+```
+
+Or if using systemd:
+
+```bash
+sudo systemctl restart keystone
+```
+
+- [ ] **Verify daemon is healthy**:
+
+```bash
+keystone daemon status
+curl http://127.0.0.1:9123/health
+```
+
+- [ ] **Test app-signal endpoint**:
+
+```bash
+curl -X POST http://127.0.0.1:9123/rotate \
+  -H "Content-Type: application/json" \
+  -d '{"secret_name": "TEST", "env": "dev", "service": null}'
+```
+
+### Post-Incident
+
+- [ ] **Implement monitoring** for daemon health
+- [ ] **Set up auto-restart** (systemd or supervisor)
+- [ ] **Review logs** for patterns
+- [ ] **File bug report** if reproducible crash
+
+---
+
+## Lost Audit Logs
+
+**Severity**: MEDIUM
+
+**Trigger**: Audit logs are missing, corrupted, or inaccessible
+
+### Immediate Response (0-5 minutes)
+
+- [ ] **Assess scope**:
+  - All logs missing?
+  - Specific date range?
+  - Specific secrets?
+
+- [ ] **Check log location**:
+
+```bash
+ls -la ~/.keystone/logs/
+```
+
+- [ ] **Check configuration**:
+
+```bash
+keystone config show | grep audit_log_path
+```
+
+### Recovery (5-30 minutes)
+
+- [ ] **Check backups** (if available):
+
+```bash
+rsync backup-server:/keystone-audit-logs/ ~/.keystone/logs/
+```
+
+- [ ] **Reconstruct from provider logs** (if possible):
+  - Review provider console for recent changes
+  - Document what secrets were rotated
+
+- [ ] **Verify signing key** is intact:
+
+```bash
+ls -la ~/.keystone/signing-key
+```
+
+### Preventive Measures
+
+- [ ] **Implement log backup**:
+
+```bash
+crontab -e
+# Add: 0 2 * * * rsync -av ~/.keystone/logs/ backup-server:/keystone-audit-logs/
+```
+
+- [ ] **Set up log monitoring**
+- [ ] **Document backup procedures**
+
+---
+
+## General Incident Response Principles
+
+1. **Act quickly but deliberately** - Speed matters, but don't skip steps
+2. **Document everything** - Timestamps, commands, outcomes
+3. **Communicate clearly** - Keep stakeholders informed
+4. **Verify before and after** - Confirm state before and after changes
+5. **Learn and improve** - Post-mortems should lead to concrete improvements
+
+## Escalation
+
+If incident cannot be resolved:
+
+1. **Engage on-call engineer**
+2. **Contact provider support**
+3. **Consider manual intervention** via provider console
+4. **Update status page** if customer-facing
+5. **Prepare communication** for affected users
+
