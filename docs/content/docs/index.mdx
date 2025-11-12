@@ -1,0 +1,50 @@
+---
+title: Keystone
+description: Lease. Rotate. Prove.
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card';
+
+**Lease. Rotate. Prove.**
+
+Keystone is an open-source CLI tool for safe, fast secret rotation. It updates local `.env` files and production host secrets by name, without proxying traffic. Your applications call provider APIs directly with their own keys.
+
+## Features
+
+- **Dev Mode**: Update `.env` files atomically with rollback support
+- **Production Mode**: Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare, Fly.io) and cloud secret managers (AWS, GCP, Azure)
+- **App-Signal Rotation**: Accept rotation requests from applications (e.g., on 429/rate-limit headers)
+- **Manual & Scheduled**: Operator-triggered and cron-friendly
+- **Rollback**: Time-boxed rollback with automatic key revocation
+- **Audit Logging**: Cryptographically signed logs with Ed25519
+- **Safety Rails**: Single-writer locks, cooldowns, dry-run mode, maintenance windows
+
+## Quick Start
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" />
+  <Card title="Quick Start Guide" href="/docs/quick-start" />
+  <Card title="Configuration" href="/docs/configuration" />
+  <Card title="Usage Guide" href="/docs/usage" />
+</Cards>
+
+## Architecture
+
+Keystone is a single Rust binary with:
+- CLI for manual operations
+- Optional background daemon for app-signal handling
+- File-based locking and audit logging
+- Connector architecture for provider integrations
+
+**No traffic proxying. No central secret storage.** Just direct updates to your `.env` files and provider APIs.
+
+## Next Steps
+
+Choose your path based on your use case:
+
+<Cards>
+  <Card title="Developer Guide" href="/docs/usage" />
+  <Card title="Operator Runbook" href="/docs/operators/runbook" />
+  <Card title="Connectors" href="/docs/connectors" />
+  <Card title="CLI Reference" href="/docs/cli-reference" />
+</Cards>

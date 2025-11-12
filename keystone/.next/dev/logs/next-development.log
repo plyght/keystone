@@ -1,0 +1,22 @@
+[00:04:36.211] Server  ERROR    ⨯ PageNotFoundError: Cannot find module for page: route not found /_not-found/page
+[00:04:36.226] Server  ERROR    ⨯ PageNotFoundError: Cannot find module for page: route not found /_not-found/page
+[00:04:36.229] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:36.230] Server  ERROR    ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:36.231] Server  ERROR    ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:36.666] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/nicojaffer/keystone/keystone/.next/dev/static/development/_buildManifest.js.tmp.mcaau6tq8x9'
+[00:04:36.667] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:36.746] Server  ERROR   Error: Cannot find module '/Users/nicojaffer/keystone/keystone/node_modules/styled-jsx/index.js'
+Require stack:
+- /Users/nicojaffer/node_modules/.pnpm/next@15.5.6_@babel+core@7.26.9_@opentelemetry+api@1.9.0_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/next/dist/compiled/next-server/pages-turbo.runtime.dev.js
+- /Users/nicojaffer/node_modules/.pnpm/next@15.5.6_@babel+core@7.26.9_@opentelemetry+api@1.9.0_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/next/dist/server/route-modules/pages/module.compiled.js
+- /Users/nicojaffer/node_modules/.pnpm/next@15.5.6_@babel+core@7.26.9_@opentelemetry+api@1.9.0_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/next/dist/server/route-modules/pages/vendored/contexts/html-context.js
+- /Users/nicojaffer/node_modules/.pnpm/next@15.5.6_@babel+core@7.26.9_@opentelemetry+api@1.9.0_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/next/dist/pages/_document.js
+- /Users/nicojaffer/keystone/keystone/node_modules/next/dist/server/load-default-error-components.js
+- /Users/nicojaffer/keystone/keystone/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/nicojaffer/keystone/keystone/node_modules/next/dist/server/next.js
+- /Users/nicojaffer/keystone/keystone/node_modules/next/dist/server/lib/start-server.js
+[00:04:36.747] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:39.987] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:39.989] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:40.015] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'
+[00:04:40.019] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/nicojaffer/keystone/keystone/app'

@@ -128,9 +128,22 @@ Environment variables override config file settings:
 
 ## Documentation
 
-- [Operator Runbook](docs/OPERATOR_RUNBOOK.md) - Production deployment and operations
-- [Rotation Checklist](docs/ROTATION_CHECKLIST.md) - Step-by-step rotation procedures
-- [Incident Checklist](docs/INCIDENT_CHECKLIST.md) - Incident response and troubleshooting
+📚 **[Full Documentation](./docs)** - Complete documentation powered by Fumadocs
+
+Quick links:
+- [Quick Start Guide](./docs/content/docs/quick-start.mdx)
+- [Operator Runbook](./docs/content/docs/operators/runbook.mdx)
+- [CLI Reference](./docs/content/docs/cli-reference.mdx)
+
+To run the docs locally:
+
+```bash
+cd docs
+bun install
+bun run dev
+```
+
+Then open [http://localhost:3000](http://localhost:3000)
 
 ## Architecture
 

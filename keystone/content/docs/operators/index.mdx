@@ -1,0 +1,70 @@
+---
+title: Operators Guide
+description: Production operations and incident response for Keystone
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card';
+
+# Operators Guide
+
+Comprehensive guides for running Keystone in production environments.
+
+## Documentation
+
+<Cards>
+  <Card title="Operator Runbook" href="/docs/operators/runbook" description="Production deployment, monitoring, and troubleshooting" />
+  <Card title="Rotation Checklist" href="/docs/operators/rotation-checklist" description="Step-by-step rotation procedures" />
+  <Card title="Incident Response" href="/docs/operators/incident-checklist" description="Incident response workflows" />
+</Cards>
+
+## Quick Reference
+
+### Daily Operations
+
+- Monitor daemon health: `keystone daemon status`
+- Check recent rotations: `keystone audit --last 10`
+- Review locks: `ls -la ~/.keystone/locks/`
+
+### Emergency Response
+
+For compromised secrets:
+
+1. Rotate immediately: `keystone rotate SECRET --env prod --service SERVICE`
+2. Revoke old key at provider
+3. Check audit logs: `keystone audit SECRET --env prod`
+4. Document incident
+
+### Monitoring
+
+Key metrics to monitor:
+
+- Daemon uptime and health
+- Failed rotation attempts
+- Lock contention
+- Audit log integrity
+- Provider API availability
+
+### Troubleshooting
+
+Common issues and resolutions:
+
+- **Lock held**: Check if process is running, remove stale locks after 5min timeout
+- **Cooldown active**: Wait for cooldown or adjust settings
+- **Provider API error**: Check credentials and API status
+- **Rollback window expired**: Manual key regeneration required
+
+## Best Practices
+
+1. **Always dry-run first** in production
+2. **Test in staging** before production
+3. **Monitor audit logs** for anomalies
+4. **Rotate regularly** before expiration
+5. **Keep credentials secure** and rotate them too
+6. **Document all manual interventions**
+7. **Set up alerts** for failed rotations
+
+## Support
+
+- GitHub Issues: [https://github.com/keystone/keystone/issues](https://github.com/keystone/keystone/issues)
+- Documentation: [https://docs.keystone.dev](https://docs.keystone.dev)
+

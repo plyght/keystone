@@ -1,0 +1,15 @@
+{
+  "title": "Connectors",
+  "pages": [
+    "index",
+    "vercel",
+    "netlify",
+    "render",
+    "cloudflare",
+    "fly",
+    "aws",
+    "gcp",
+    "azure"
+  ]
+}
+

@@ -1,0 +1,51 @@
+globalThis.__BUILD_MANIFEST = {
+  "pages": {
+    "/_app": [
+      "static/chunks/4a725_next_dist_compiled_e4978cff._.js",
+      "static/chunks/4a725_next_dist_shared_lib_c4f7d790._.js",
+      "static/chunks/4a725_next_dist_client_460ebdc9._.js",
+      "static/chunks/4a725_next_dist_bd9350a2._.js",
+      "static/chunks/4a725_next_app_eb7140ca.js",
+      "static/chunks/[next]_entry_page-loader_ts_290e6a15._.js",
+      "static/chunks/76102_react-dom_44795136._.js",
+      "static/chunks/node_modules__pnpm_a607ebca._.js",
+      "static/chunks/[root-of-the-server]__84f9c916._.js",
+      "static/chunks/keystone_keystone_pages__app_2da965e7._.js",
+      "static/chunks/turbopack-keystone_keystone_pages__app_134e03d7._.js"
+    ],
+    "/_error": [
+      "static/chunks/4a725_next_dist_compiled_e4978cff._.js",
+      "static/chunks/4a725_next_dist_shared_lib_eec9baac._.js",
+      "static/chunks/4a725_next_dist_client_460ebdc9._.js",
+      "static/chunks/4a725_next_dist_d9f93565._.js",
+      "static/chunks/4a725_next_error_35a5d413.js",
+      "static/chunks/[next]_entry_page-loader_ts_a6f9344b._.js",
+      "static/chunks/76102_react-dom_44795136._.js",
+      "static/chunks/node_modules__pnpm_a607ebca._.js",
+      "static/chunks/[root-of-the-server]__cca657fc._.js",
+      "static/chunks/keystone_keystone_pages__error_2da965e7._.js",
+      "static/chunks/turbopack-keystone_keystone_pages__error_8af42572._.js"
+    ]
+  },
+  "devFiles": [],
+  "polyfillFiles": [
+    "static/chunks/e30a7_next_dist_build_polyfills_polyfill-nomodule.js"
+  ],
+  "lowPriorityFiles": [],
+  "rootMainFiles": [
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_deeddeea._.js",
+    "static/chunks/e30a7_next_dist_compiled_react-dom_134774e5._.js",
+    "static/chunks/e30a7_next_dist_compiled_react-server-dom-turbopack_edfac2fe._.js",
+    "static/chunks/e30a7_next_dist_compiled_next-devtools_index_27495ac3.js",
+    "static/chunks/e30a7_next_dist_compiled_70818f9c._.js",
+    "static/chunks/e30a7_next_dist_client_89829445._.js",
+    "static/chunks/e30a7_next_dist_04265fa5._.js",
+    "static/chunks/e30a7_@swc_helpers_cjs_b8c12489._.js",
+    "static/chunks/keystone_keystone_a0ff3932._.js",
+    "static/chunks/turbopack-keystone_keystone_d1d2d33a._.js"
+  ]
+};
+globalThis.__BUILD_MANIFEST.lowPriorityFiles = [
+"/static/" + process.env.__NEXT_BUILD_ID + "/_buildManifest.js",
+"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js"
+];

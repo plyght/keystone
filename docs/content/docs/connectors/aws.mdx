@@ -1,0 +1,49 @@
+---
+title: AWS Secrets Manager Connector
+description: Rotate secrets in AWS Secrets Manager (Placeholder)
+---
+
+⚠️ **Placeholder Implementation** - Requires AWS SDK for full functionality.
+
+## Status
+
+The AWS Secrets Manager connector is currently a placeholder that requires the official AWS SDK (`aws-sdk-secretsmanager`) for production use.
+
+## Prerequisites
+
+- AWS account with Secrets Manager access
+- AWS credentials with appropriate IAM permissions
+
+## Setup
+
+```bash
+export AWS_ACCESS_KEY_ID="your-access-key"
+export AWS_SECRET_ACCESS_KEY="your-secret-key"
+export AWS_REGION="us-east-1"
+```
+
+## Current Behavior
+
+When you attempt to use the AWS connector, you'll see:
+
+```
+⚠️  AWS Secrets Manager integration requires AWS SDK
+   Secret name: MY_SECRET
+   Region: us-east-1
+   This is a placeholder implementation
+```
+
+## Implementation Required
+
+To complete this connector, add `aws-sdk-secretsmanager` dependency and implement:
+- Secret value updates
+- Secret retrieval
+- Service refresh triggers (ECS, Lambda, etc.)
+
+## Workaround
+
+Until the full implementation is complete, you can:
+1. Use AWS CLI directly for secret rotation
+2. Implement a custom connector
+3. Contribute to the project by adding AWS SDK integration
+

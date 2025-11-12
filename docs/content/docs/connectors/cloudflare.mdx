@@ -1,0 +1,52 @@
+---
+title: Cloudflare Workers Connector
+description: Rotate secrets for Cloudflare Workers
+---
+
+Rotate secrets for Cloudflare Workers.
+
+## Prerequisites
+
+- Cloudflare account with Workers
+- Cloudflare API token
+
+## Setup
+
+### 1. Get Your API Token
+
+Create an API token at [Cloudflare Dashboard → My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens).
+
+Required permissions:
+- Account → Workers Scripts → Edit
+
+### 2. Get Account and Worker Details
+
+```bash
+# Account ID from dashboard URL or workers settings
+# Worker name from your worker's settings
+```
+
+### 3. Configure Credentials
+
+```bash
+export CLOUDFLARE_API_TOKEN="your-api-token"
+export CLOUDFLARE_ACCOUNT_ID="your-account-id"
+export CLOUDFLARE_WORKER_NAME="your-worker-name"
+```
+
+## Usage
+
+```bash
+keystone rotate MY_API_KEY --env prod --service cloudflare
+```
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Update secret | ✅ Yes |
+| Get secret value | ❌ No (API limitation) |
+| Trigger deploy | N/A* |
+
+\* Cloudflare Workers automatically use updated secrets on the next invocation - no redeploy needed.
+

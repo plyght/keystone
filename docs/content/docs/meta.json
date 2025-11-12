@@ -1,0 +1,17 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "installation",
+    "quick-start",
+    "configuration",
+    "usage",
+    "---Operators",
+    "operators",
+    "---Connectors",
+    "connectors",
+    "---CLI Reference",
+    "cli-reference"
+  ]
+}
+

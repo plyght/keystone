@@ -1,0 +1,53 @@
+---
+title: Fly.io Connector
+description: Rotate secrets on Fly.io
+---
+
+Rotate secrets for Fly.io applications.
+
+## Prerequisites
+
+- Fly.io account with an app
+- Fly.io API token
+
+## Setup
+
+### 1. Get Your API Token
+
+```bash
+fly auth token
+```
+
+### 2. Get Your App Name
+
+```bash
+fly apps list
+```
+
+### 3. Configure Credentials
+
+```bash
+export FLY_API_TOKEN="your-api-token"
+export FLY_APP_NAME="your-app-name"
+```
+
+## Usage
+
+```bash
+keystone rotate MY_API_KEY --env prod --service fly
+```
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Update secret | ✅ Yes |
+| Get secret value | ❌ No (API limitation) |
+| Trigger deploy | Auto* |
+
+\* Fly.io automatically restarts apps when secrets are updated - no manual redeploy needed.
+
+## Notes
+
+Fly.io uses GraphQL API for secret management. Keystone handles this automatically.
+

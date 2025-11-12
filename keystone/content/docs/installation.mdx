@@ -1,0 +1,85 @@
+---
+title: Installation
+description: Install Keystone on your system
+---
+
+# Installation
+
+Keystone can be installed in multiple ways depending on your platform and preferences.
+
+## From Source
+
+Build from source using Cargo:
+
+```bash
+git clone https://github.com/keystone/keystone
+cd keystone
+cargo build --release
+sudo cp target/release/keystone /usr/local/bin/
+```
+
+## Pre-built Binaries
+
+Download pre-built binaries from the [releases page](https://github.com/keystone/keystone/releases):
+
+```bash
+# Linux
+wget https://github.com/keystone/keystone/releases/latest/download/keystone-linux-x86_64
+chmod +x keystone-linux-x86_64
+sudo mv keystone-linux-x86_64 /usr/local/bin/keystone
+
+# macOS
+wget https://github.com/keystone/keystone/releases/latest/download/keystone-darwin-x86_64
+chmod +x keystone-darwin-x86_64
+sudo mv keystone-darwin-x86_64 /usr/local/bin/keystone
+
+# Windows
+# Download keystone-windows-x86_64.exe and add to PATH
+```
+
+## Docker
+
+Run Keystone in a container:
+
+```bash
+docker pull keystone:latest
+
+# Run a command
+docker run --rm keystone:latest --help
+
+# Run with environment variables
+docker run --rm \
+  -e VERCEL_TOKEN=your-token \
+  -e VERCEL_PROJECT_ID=your-project \
+  keystone:latest rotate MY_API_KEY --env prod --service vercel
+```
+
+## Using Make
+
+If you have the repository cloned:
+
+```bash
+make release    # Build release binary
+make install    # Install to /usr/local/bin
+make docker     # Build Docker image
+```
+
+## Verify Installation
+
+Check that Keystone is installed correctly:
+
+```bash
+keystone --version
+keystone --help
+```
+
+You should see the version number and help text.
+
+## Next Steps
+
+After installation:
+
+1. [Initialize configuration](/docs/configuration)
+2. [Follow the Quick Start guide](/docs/quick-start)
+3. [Set up provider credentials](/docs/connectors)
+

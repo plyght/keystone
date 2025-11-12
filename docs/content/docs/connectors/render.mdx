@@ -1,0 +1,51 @@
+---
+title: Render Connector
+description: Rotate secrets on Render
+---
+
+Rotate environment variables on Render services.
+
+## Prerequisites
+
+- Render account with a service
+- Render API key
+
+## Setup
+
+### 1. Get Your Render API Key
+
+Create an API key at [Render Account Settings → API Keys](https://dashboard.render.com/u/settings#api-keys).
+
+### 2. Find Your Service ID
+
+```bash
+# From Render dashboard:
+# https://dashboard.render.com/web/your-service
+# The service ID is in the URL: srv_xxxxx
+```
+
+### 3. Configure Credentials
+
+```bash
+export RENDER_API_KEY="your-api-key"
+export RENDER_SERVICE_ID="srv_xxxxx"
+```
+
+## Usage
+
+```bash
+# Rotate a secret
+keystone rotate MY_API_KEY --env prod --service render
+
+# Trigger deployment after rotation
+keystone rotate MY_API_KEY --env prod --service render --redeploy
+```
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Update secret | ✅ Yes |
+| Get secret value | ❌ No (API limitation) |
+| Trigger deploy | ✅ Yes |
+
