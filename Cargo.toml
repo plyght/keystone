@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["Keystone Contributors"]
 description = "Lease. Rotate. Prove. - Secret rotation tool for local .env and production hosts"
 license = "MIT"
-repository = "https://github.com/keystone/keystone"
+repository = "https://github.com/plyght/keystone"
 
 [lib]
 name = "keystone"

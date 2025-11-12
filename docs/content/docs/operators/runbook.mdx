@@ -18,7 +18,7 @@ This runbook covers production deployment, monitoring, and troubleshooting for K
 #### Option 1: Build from Source
 
 ```bash
-git clone https://github.com/keystone/keystone
+git clone https://github.com/plyght/keystone
 cd keystone
 cargo build --release
 sudo cp target/release/keystone /usr/local/bin/
@@ -27,7 +27,7 @@ sudo cp target/release/keystone /usr/local/bin/
 #### Option 2: Download Pre-built Binary
 
 ```bash
-wget https://github.com/keystone/keystone/releases/latest/download/keystone-linux-x86_64
+wget https://github.com/plyght/keystone/releases/latest/download/keystone-linux-x86_64
 chmod +x keystone-linux-x86_64
 sudo mv keystone-linux-x86_64 /usr/local/bin/keystone
 ```
