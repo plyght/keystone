@@ -12,29 +12,28 @@ pub async fn update_env_file(
     } else {
         PathBuf::from(".env")
     };
-    
+
     if !env_path.exists() {
         anyhow::bail!(".env file not found at: {}", env_path.display());
     }
-    
-    let original_contents = fs::read_to_string(&env_path)
-        .context("Failed to read .env file")?;
-    
+
+    let original_contents = fs::read_to_string(&env_path).context("Failed to read .env file")?;
+
     let rollback_path = PathBuf::from(".birch-rollback");
     fs::write(&rollback_path, &original_contents)?;
-    
+
     let mut new_contents = String::new();
     let mut found = false;
-    
+
     for line in original_contents.lines() {
         let trimmed = line.trim();
-        
+
         if trimmed.starts_with('#') || trimmed.is_empty() {
             new_contents.push_str(line);
             new_contents.push('\n');
             continue;
         }
-        
+
         if let Some(pos) = line.find('=') {
             let key = line[..pos].trim();
             if key == secret_name {
@@ -43,23 +42,54 @@ pub async fn update_env_file(
                 continue;
             }
         }
-        
+
         new_contents.push_str(line);
         new_contents.push('\n');
     }
-    
+
     if !found {
         new_contents.push_str(&format!("{}={}\n", secret_name, new_value));
     }
-    
+
     let temp_path = env_path.with_extension("tmp");
     fs::write(&temp_path, &new_contents)?;
     fs::rename(&temp_path, &env_path)?;
-    
+
     println!("📝 Updated {} in {}", secret_name, env_path.display());
     println!("💡 Restart your application to use the new secret");
     println!("🔙 Rollback saved to {}", rollback_path.display());
-    
+
     Ok(())
 }
 
+pub fn get_env_secret(secret_name: &str, env_file: Option<&str>) -> Result<Option<String>> {
+    let env_path = if let Some(path) = env_file {
+        PathBuf::from(path)
+    } else {
+        PathBuf::from(".env")
+    };
+
+    if !env_path.exists() {
+        return Ok(None);
+    }
+
+    let contents = fs::read_to_string(&env_path).context("Failed to read .env file")?;
+
+    for line in contents.lines() {
+        let trimmed = line.trim();
+
+        if trimmed.starts_with('#') || trimmed.is_empty() {
+            continue;
+        }
+
+        if let Some(pos) = line.find('=') {
+            let key = line[..pos].trim();
+            if key == secret_name {
+                let value = line[pos + 1..].trim();
+                return Ok(Some(value.to_string()));
+            }
+        }
+    }
+
+    Ok(None)
+}

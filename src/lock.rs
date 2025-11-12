@@ -21,26 +21,26 @@ impl Lock {
         let birch_dir = crate::config::Config::birch_dir();
         let locks_dir = birch_dir.join("locks");
         fs::create_dir_all(&locks_dir)?;
-        
+
         let lock_file = format!("{}-{}.lock", env, secret_name);
         let path = locks_dir.join(lock_file);
-        
+
         Ok(Self {
             path,
             acquired: false,
         })
     }
-    
+
     pub fn acquire(&mut self, operation: &str) -> Result<()> {
         if self.path.exists() {
             let contents = fs::read_to_string(&self.path)?;
-            let lock_data: LockData = serde_json::from_str(&contents)
-                .context("Failed to parse lock file")?;
-            
+            let lock_data: LockData =
+                serde_json::from_str(&contents).context("Failed to parse lock file")?;
+
             let now = Utc::now();
             let lock_age = now.signed_duration_since(lock_data.timestamp);
             let timeout = Duration::minutes(5);
-            
+
             if lock_age < timeout {
                 anyhow::bail!(
                     "Lock already held by PID {} for operation '{}' (acquired {} ago)",
@@ -49,7 +49,7 @@ impl Lock {
                     format_duration(lock_age)
                 );
             }
-            
+
             tracing::warn!(
                 "Removing stale lock from PID {} (age: {})",
                 lock_data.pid,
@@ -57,19 +57,19 @@ impl Lock {
             );
             fs::remove_file(&self.path)?;
         }
-        
+
         let lock_data = LockData {
             pid: std::process::id(),
             timestamp: Utc::now(),
             operation: operation.to_string(),
         };
-        
+
         fs::write(&self.path, serde_json::to_string_pretty(&lock_data)?)?;
         self.acquired = true;
-        
+
         Ok(())
     }
-    
+
     pub fn release(&mut self) -> Result<()> {
         if self.acquired && self.path.exists() {
             fs::remove_file(&self.path)?;
@@ -95,4 +95,3 @@ fn format_duration(d: Duration) -> String {
         format!("{}h", seconds / 3600)
     }
 }
-

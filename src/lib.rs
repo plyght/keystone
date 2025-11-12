@@ -5,8 +5,8 @@ pub mod connectors;
 pub mod daemon;
 pub mod dev;
 pub mod lock;
+pub mod pool;
 pub mod prod;
 pub mod rollback;
 pub mod rotation;
 pub mod signals;
-
