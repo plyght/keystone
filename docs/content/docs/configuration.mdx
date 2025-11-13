@@ -41,6 +41,9 @@ rollback_window_seconds = 3600
 
 # Daemon bind address
 daemon_bind = "127.0.0.1:9123"
+
+# Threshold for pool low-key warnings (default: 2)
+pool_low_threshold = 2
 ```
 
 ### Maintenance Windows
@@ -90,6 +93,7 @@ export BIRCH_AUDIT_LOG_PATH="/var/log/birch"
 export BIRCH_COOLDOWN_SECONDS=30
 export BIRCH_ROLLBACK_WINDOW_SECONDS=7200
 export BIRCH_DAEMON_BIND="0.0.0.0:9123"
+export BIRCH_POOL_LOW_THRESHOLD=2
 ```
 
 ### Vercel

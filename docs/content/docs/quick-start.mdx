@@ -128,6 +128,81 @@ birch audit --last 10
 birch audit MY_API_KEY --env prod
 ```
 
+## Advanced: Set Up Key Pools (Optional)
+
+For APIs with rate limits, you can set up a pool of keys for automatic rotation:
+
+### 1. Create a Key Pool
+
+```bash
+# Create a pool with multiple keys
+birch pool init TIKTOK_API_KEY --keys "sk_key1,sk_key2,sk_key3"
+```
+
+Or from a file:
+
+```bash
+# Create keys.txt with one key per line:
+# sk_abc123xyz
+# sk_def456uvw
+# sk_ghi789rst
+
+birch pool init TIKTOK_API_KEY --from-file ./keys.txt
+```
+
+### 2. Check Pool Status
+
+```bash
+birch pool status TIKTOK_API_KEY
+# Pool: TIKTOK_API_KEY
+# Status: ✅ Ready
+# Total keys:      3
+# Available:       3 (100%)
+```
+
+### 3. Rotate with Pool
+
+Now when you rotate, Birch will automatically use the next available key:
+
+```bash
+birch rotate TIKTOK_API_KEY --env prod --service vercel
+# 🎱 Using key pool for 'TIKTOK_API_KEY' (2 available, 1 exhausted)
+# ✓ Marked current key as exhausted
+# 🔄 Rotating secret...
+```
+
+### 4. Automatic Rotation on Rate Limits
+
+Your app can trigger rotation when hitting rate limits:
+
+```javascript
+if (response.status === 429) {
+  // Signal birch to rotate to next key in pool
+  await fetch('http://localhost:9123/rotate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret_name: 'TIKTOK_API_KEY',
+      env: 'prod',
+      service: 'vercel'
+    })
+  });
+}
+```
+
+### 5. Manage Your Pool
+
+```bash
+# View all keys and their status
+birch pool list TIKTOK_API_KEY
+
+# Add a new key
+birch pool add TIKTOK_API_KEY --key "sk_new_key"
+
+# Remove exhausted keys
+birch pool remove TIKTOK_API_KEY --index 0
+```
+
 ## Next Steps
 
 Now that you've completed your first rotation:

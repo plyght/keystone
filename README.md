@@ -6,6 +6,7 @@ Birch is an open-source CLI tool for safe, fast secret rotation. It updates loca
 
 ## Features
 
+- **Key Pools**: Pre-configure multiple API keys for automatic sequential rotation on rate limits
 - **Dev Mode**: Update `.env` files atomically with rollback support
 - **Production Mode**: Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare, Fly.io) and cloud secret managers (AWS, GCP, Azure)
 - **App-Signal Rotation**: Accept rotation requests from applications (e.g., on 429/rate-limit headers)
@@ -77,6 +78,39 @@ birch rollback MY_API_KEY --env prod --service vercel
 birch audit MY_API_KEY --env prod
 ```
 
+### Key Pools for Automatic Rotation
+
+Set up a pool of API keys for automatic rotation when rate limits are hit:
+
+```bash
+# Create a pool with multiple keys
+birch pool init TIKTOK_API_KEY --keys "sk_key1,sk_key2,sk_key3"
+
+# Check pool status
+birch pool status TIKTOK_API_KEY
+
+# Rotate (automatically uses next available key from pool)
+birch rotate TIKTOK_API_KEY --env prod --service vercel
+```
+
+When your app hits a rate limit (HTTP 429), it can trigger automatic rotation:
+
+```javascript
+if (response.status === 429) {
+  await fetch('http://localhost:9123/rotate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret_name: 'TIKTOK_API_KEY',
+      env: 'prod',
+      service: 'vercel'
+    })
+  });
+}
+```
+
+See [Key Pool Documentation](./docs/content/docs/usage/key-pools.mdx) for details.
+
 ## Configuration
 
 Edit `~/.birch/config.toml`:
@@ -86,6 +120,7 @@ audit_log_path = "/Users/you/.birch/logs"
 cooldown_seconds = 60
 rollback_window_seconds = 3600
 daemon_bind = "127.0.0.1:9123"
+pool_low_threshold = 2
 
 [[maintenance_windows]]
 start_hour = 2
@@ -101,6 +136,7 @@ Environment variables override config file settings:
 - `BIRCH_AUDIT_LOG_PATH`
 - `BIRCH_COOLDOWN_SECONDS`
 - `BIRCH_ROLLBACK_WINDOW_SECONDS`
+- `BIRCH_POOL_LOW_THRESHOLD`
 - `VERCEL_TOKEN`, `NETLIFY_AUTH_TOKEN`, `RENDER_API_KEY`, etc.
 
 ## Supported Providers

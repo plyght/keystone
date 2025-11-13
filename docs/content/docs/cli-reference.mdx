@@ -171,6 +171,168 @@ birch config show
 birch config init
 ```
 
+### pool
+
+Manage key pools for automatic rotation.
+
+```bash
+birch pool <ACTION>
+```
+
+**Actions:**
+- `init`: Create a new key pool
+- `add`: Add a key to existing pool
+- `list`: Display all keys in pool
+- `remove`: Remove a key from pool
+- `import`: Import keys from file
+- `status`: Show pool statistics
+
+#### pool init
+
+Create a new key pool with initial keys.
+
+```bash
+birch pool init <SECRET_NAME> [OPTIONS]
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret (e.g., TIKTOK_API_KEY) [required]
+
+**Options:**
+- `--keys <KEYS>`: Comma-separated list of keys
+- `--from-file <FILE>`: Path to file with keys (one per line)
+
+**Examples:**
+
+```bash
+# Create pool with inline keys
+birch pool init TIKTOK_API_KEY --keys "key1,key2,key3"
+
+# Create pool from file
+birch pool init TIKTOK_API_KEY --from-file ./tiktok-keys.txt
+
+# Keys file format (one key per line):
+# sk_abc123xyz
+# sk_def456uvw
+# sk_ghi789rst
+# # Comments and empty lines are ignored
+```
+
+#### pool add
+
+Add a single key to an existing pool.
+
+```bash
+birch pool add <SECRET_NAME> --key <KEY>
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret pool [required]
+
+**Options:**
+- `--key <KEY>`: The key value to add [required]
+
+**Examples:**
+
+```bash
+birch pool add TIKTOK_API_KEY --key "sk_new123abc"
+```
+
+#### pool list
+
+Display all keys in a pool with their status.
+
+```bash
+birch pool list <SECRET_NAME>
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret pool [required]
+
+**Examples:**
+
+```bash
+birch pool list TIKTOK_API_KEY
+# Output:
+# Pool: TIKTOK_API_KEY
+# ─────────────────────────────────────
+# 0: 🟢 Active ***abc (last used: 2024-01-15 14:30:22)
+# 1: ⚪ Available ***xyz
+# 2: 🔴 Exhausted ***def (last used: 2024-01-15 12:15:10)
+# ─────────────────────────────────────
+# Total: 3 keys
+# Available: 1 | Active: 1 | Exhausted: 1
+```
+
+#### pool remove
+
+Remove a key from a pool by its index.
+
+```bash
+birch pool remove <SECRET_NAME> --index <INDEX>
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret pool [required]
+
+**Options:**
+- `--index <INDEX>`: Index of the key to remove [required]
+
+**Examples:**
+
+```bash
+# Remove key at index 2
+birch pool remove TIKTOK_API_KEY --index 2
+```
+
+#### pool import
+
+Import multiple keys from a file into an existing pool.
+
+```bash
+birch pool import <SECRET_NAME> --from-file <FILE>
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret pool [required]
+
+**Options:**
+- `--from-file <FILE>`: Path to file with keys (one per line) [required]
+
+**Examples:**
+
+```bash
+birch pool import TIKTOK_API_KEY --from-file ./additional-keys.txt
+```
+
+#### pool status
+
+Show detailed statistics about a key pool.
+
+```bash
+birch pool status <SECRET_NAME>
+```
+
+**Arguments:**
+- `SECRET_NAME`: Name of the secret pool [required]
+
+**Examples:**
+
+```bash
+birch pool status TIKTOK_API_KEY
+# Output:
+# Pool: TIKTOK_API_KEY
+# Status: ✅ Ready
+#
+# Total keys:      5
+# Available:       3 (60%)
+# Active:          1
+# Exhausted:       1
+#
+# Current index:   2
+# Last rotation:   2024-01-15 14:30:22 UTC
+```
+
 ## Exit Codes
 
 - `0`: Success
@@ -186,6 +348,7 @@ birch config init
 - `BIRCH_COOLDOWN_SECONDS`: Cooldown period
 - `BIRCH_ROLLBACK_WINDOW_SECONDS`: Rollback window
 - `BIRCH_DAEMON_BIND`: Daemon bind address
+- `BIRCH_POOL_LOW_THRESHOLD`: Warning threshold for pool keys (default: 2)
 
 ### Provider Credentials
 
