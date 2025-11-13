@@ -7,8 +7,8 @@ fn test_vault_encryption_decryption() {
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     );
 
-    let encryption = birch_api::vault::encryption::VaultEncryption::new()
-        .expect("Failed to create encryption");
+    let encryption =
+        birch_api::vault::encryption::VaultEncryption::new().expect("Failed to create encryption");
 
     let workspace_id = Uuid::new_v4();
     let plaintext = "test-secret-value";
