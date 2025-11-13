@@ -62,7 +62,7 @@ pub async fn stop() -> Result<()> {
     {
         use std::process::Command;
         Command::new("taskkill")
-            .args(&["/PID", &pid.to_string(), "/F"])
+            .args(["/PID", &pid.to_string(), "/F"])
             .status()?;
     }
 
@@ -120,7 +120,7 @@ fn is_process_running(pid: u32) -> bool {
     {
         use std::process::Command;
         Command::new("tasklist")
-            .args(&["/FI", &format!("PID eq {}", pid)])
+            .args(["/FI", &format!("PID eq {}", pid)])
             .output()
             .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
             .unwrap_or(false)
