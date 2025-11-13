@@ -333,6 +333,75 @@ birch pool status TIKTOK_API_KEY
 # Last rotation:   2024-01-15 14:30:22 UTC
 ```
 
+### dashboard
+
+Launch an interactive TUI dashboard for monitoring Birch operations.
+
+```bash
+birch dashboard
+```
+
+The dashboard provides real-time monitoring of:
+- **Daemon Status**: Whether the daemon is running, PID, and bind address
+- **Metrics**: Total rotations, success/failure counts, and success rate
+- **Recent Audit Logs**: Last 50 rotation events with timestamps and status
+- **Key Pools**: Overview of all configured pools with availability status
+
+**Keyboard Controls:**
+- `q` - Quit the dashboard
+- `r` - Manually refresh data (auto-refreshes every 5 seconds)
+- `↑` / `↓` - Scroll through audit logs
+- `Page Up` / `Page Down` - Fast scroll through audit logs
+
+**Dashboard Layout:**
+
+```
+┌─────────────────────────────────────────────────┐
+│ BIRCH | Dashboard                               │
+├──────────────────┬──────────────────────────────┤
+│ Daemon Status    │ Recent Audit Logs            │
+│   Running/Stopped│   [OK] timestamp action...   │
+│   PID: 12345     │   [FAIL] timestamp action... │
+│                  │   (scrollable)               │
+│ Metrics          │                              │
+│   Total: 150     ├──────────────────────────────┤
+│   Success: 148   │ Key Pools                    │
+│   Failed: 2      │   [OK] POOL_NAME - 5 total  │
+│   Rate: 98.7%    │   [LOW] POOL_NAME - 2 avail │
+└──────────────────┴──────────────────────────────┘
+│ q quit  r refresh  ↑↓ scroll                   │
+└─────────────────────────────────────────────────┘
+```
+
+**Status Indicators:**
+
+Audit Logs:
+- `[OK]` - Successful rotation
+- `[FAIL]` - Failed rotation
+
+Key Pools:
+- `[OK]` - Sufficient keys available (> 2)
+- `[LOW]` - Low key count (≤ 2 available)
+- `[EMPTY]` - No keys available
+
+**Examples:**
+
+```bash
+# Launch dashboard
+birch dashboard
+
+# Typical workflow: start daemon, then monitor with dashboard
+birch daemon start
+birch dashboard
+```
+
+**Use Cases:**
+- Monitor daemon health and uptime
+- Review recent rotation history
+- Check pool key availability at a glance
+- Troubleshoot rotation issues in real-time
+- Verify successful rotations after changes
+
 ## Exit Codes
 
 - `0`: Success

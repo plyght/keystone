@@ -65,11 +65,7 @@ impl DashboardState {
 
         self.metrics.total_rotations = self.recent_audits.len();
         self.metrics.successful_rotations = self.recent_audits.iter().filter(|e| e.success).count();
-        self.metrics.failed_rotations = self
-            .recent_audits
-            .iter()
-            .filter(|e| !e.success)
-            .count();
+        self.metrics.failed_rotations = self.recent_audits.iter().filter(|e| !e.success).count();
 
         let pool_names = pool::list_all_pools()?;
         self.pools.clear();
@@ -404,4 +400,3 @@ fn render_footer(f: &mut Frame, area: Rect) {
 
     f.render_widget(footer, area);
 }
-

@@ -51,6 +51,20 @@ birch audit [SECRET_NAME] [OPTIONS]
 - `--env`: Filter by environment
 - `--last N`: Show last N entries
 
+### Monitor with Dashboard
+
+```bash
+birch dashboard
+```
+
+Launch an interactive TUI dashboard that displays:
+- Daemon status and health
+- Recent audit logs (scrollable)
+- Key pool status overview
+- Rotation metrics and success rates
+
+Use `q` to quit, `r` to refresh, arrow keys to scroll.
+
 ### Manage Key Pools
 
 ```bash
