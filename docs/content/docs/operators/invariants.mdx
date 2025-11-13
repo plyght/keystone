@@ -1,0 +1,93 @@
+---
+title: Invariants and Guarantees
+description: What Birch guarantees and what it does not guarantee
+---
+
+This document describes what Birch guarantees, what it does not guarantee, operational assumptions, and rollback semantics.
+
+## What Birch Guarantees
+
+### Atomic Updates
+
+- **Dev Mode**: `.env` file updates are atomic. Rollback files are created before modification.
+- **Production Mode**: Provider API updates are atomic per-provider where supported.
+
+### Signed Audit Logs
+
+Every rotation generates a cryptographically signed audit log entry (Ed25519). Logs are immutable, verifiable, and include all rotations, rollbacks, and pool operations.
+
+### Single-Writer Locks
+
+Only one rotation operation can proceed per secret per environment at a time. File-based locks prevent concurrent rotations. Cooldown periods prevent rapid successive rotations.
+
+### Rollback Window
+
+Rollbacks are available within the configured time window (default: 1 hour). After expiration, rollback state is cleaned up and old keys are marked for revocation.
+
+### Key Pool Integrity
+
+Keys rotate sequentially in the order added. Exhausted keys are tracked and marked for rotation. Pool state persists across daemon restarts.
+
+## What Birch Does Not Guarantee
+
+### Multi-Node Coordination
+
+File-based locking is local to the filesystem. Multiple daemon instances on different machines do not coordinate. Use a single daemon instance or shared filesystem for multi-node deployments.
+
+### Provider API Availability
+
+Network failures, rate limits, or authentication failures will cause rotation failures. Monitor provider API status and implement retry logic.
+
+### Secret Value Validation
+
+Birch does not validate secret formats or verify secrets with providers before rotation. Use dry-run mode and test in non-production environments first.
+
+### Application Availability
+
+Redeployments may cause brief downtime. Some providers have delays in secret propagation. Applications must reload secrets after rotation.
+
+### Concurrent Provider Updates
+
+Rotating the same secret across multiple providers is not atomic. Rotate per-provider in separate operations if atomicity is required.
+
+## Operational Assumptions
+
+Birch assumes:
+
+- **Filesystem consistency**: Lock files, audit logs, config files, and rollback files are readable/writable
+- **Provider API reliability**: APIs are idempotent and return clear error messages
+- **Network connectivity**: Outbound HTTPS connections to provider APIs are available
+- **Clock synchronization**: System clocks are synchronized (affects rollback windows and cooldowns)
+
+If these assumptions are violated, rotations will fail. Check filesystem permissions, network configuration, and provider API status.
+
+## Rollback Semantics
+
+Rollbacks are time-bound (default: 1 hour, configurable via `rollback_window_seconds`). Each rotation can only be rolled back once. After the window expires, rollback state is cleaned up.
+
+**Process**: Birch checks rollback state, retrieves the previous key, updates the provider, logs the operation, and marks state as used.
+
+**Disaster recovery**: If rollback state is lost, previous keys may be available in provider consoles or backup systems. Audit logs contain rotation history but not plaintext secrets.
+
+## Security Considerations
+
+- **Secret storage**: Rollback files contain previous secret values. Protect with appropriate permissions.
+- **Audit logs**: Contain metadata but not plaintext secrets. Signatures ensure log integrity.
+- **Config files**: May contain provider tokens. Protect with appropriate permissions.
+- **Lock files**: Should be readable/writable only by authorized users. Stale locks can be manually removed.
+
+## Performance
+
+- **Latency**: Dev mode < 1s, production (no redeploy) 1-5s, production (with redeploy) 30-120s
+- **Throughput**: Designed for manual and scheduled rotations. Default 60s cooldown prevents rapid rotations.
+- **Resources**: Minimal memory (< 50MB for daemon), low CPU usage, audit logs grow over time (implement rotation)
+
+## Best Practices
+
+1. Test rotation procedures in staging environments
+2. Use `--dry-run` to preview changes
+3. Monitor audit logs regularly
+4. Maintain backups of rollback state and audit logs
+5. Use maintenance windows to restrict production changes
+6. Use key pools for rate-limited APIs
+7. Verify audit log signatures periodically

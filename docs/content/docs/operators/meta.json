@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "runbook",
+    "invariants",
     "rotation-checklist",
     "incident-checklist"
   ]

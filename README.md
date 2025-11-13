@@ -2,34 +2,51 @@
 
 Peel. Rotate. Renew.
 
-Birch is an open-source CLI tool for safe, fast secret rotation. It updates local `.env` files and production host secrets by name, without proxying traffic. Your applications call provider APIs directly with their own keys.
+Birch is a minimal, open-source key rotation engine for modern API-driven applications. Rotate secrets, manage key pools for rate-limited APIs, sign audit logs, and update environments—all from a single Rust binary. No Vault required. No cloud lock-in. Works standalone or integrates with your existing infrastructure.
 
-## Features
+## Why Birch
 
-- **Key Pools**: Pre-configure multiple API keys for automatic sequential rotation on rate limits
-- **Dev Mode**: Update `.env` files atomically with rollback support
-- **Production Mode**: Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare, Fly.io) and cloud secret managers (AWS Secrets Manager, GCP Secret Manager, Azure Key Vault)
-- **App-Signal Rotation**: Accept rotation requests from applications on rate limits or other triggers
-- **Manual and Scheduled**: Operator-triggered and cron-friendly
-- **Rollback**: Time-boxed rollback with automatic key revocation
-- **Audit Logging**: Cryptographically signed logs with Ed25519
-- **Safety Rails**: Single-writer locks, cooldowns, dry-run mode, maintenance windows
+Most teams handle secret rotation with ad-hoc scripts, manual processes, or heavyweight tools like Vault. Birch solves the 90% use case: rotating API keys for rate-limited services, updating `.env` files and production secrets, and maintaining audit trails—without the operational overhead.
+
+**Key Pools** are Birch's differentiating feature. When your application hits a rate limit (HTTP 429), Birch automatically rotates to the next key in your pre-configured pool, marks the exhausted key for rotation, and continues serving traffic. This solves the common problem of managing multiple Stripe keys, OpenAI keys, or SendGrid keys without manual intervention.
+
+## Comparison
+
+| Feature | Birch | Doppler | Vault | Infisical |
+|---------|-------|---------|-------|-----------|
+| Rotate API keys | Yes | Yes | Script only | Yes |
+| Key pool with rate-limit cycling | Yes | No | No | Partial |
+| Signed audit logs | Yes | No | No | No |
+| Standalone operation | Yes | No | Yes | No |
+| Host integrations | Yes | Yes | Script only | Yes |
+| Zero SaaS dependency | Yes | No | Yes | No |
 
 ## Installation
 
-### From crates.io
+### macOS (Homebrew)
+
+```bash
+brew install birch
+```
+
+### Linux / macOS (Binary)
+
+Download pre-built binaries from [releases](https://github.com/plyght/birch/releases).
+
+### From Source
 
 ```bash
 cargo install birch
 ```
 
-### From Source
+Or build from source:
 
 ```bash
-cargo install --path .
+git clone https://github.com/plyght/birch.git
+cd birch
+cargo build --release
+sudo cp target/release/birch /usr/local/bin/
 ```
-
-Or download pre-built binaries from [releases](https://github.com/plyght/birch/releases).
 
 ## Quick Start
 
@@ -41,69 +58,49 @@ birch config init
 
 This creates `~/.birch/config.toml` with default settings.
 
-### Dev Mode: Rotate a Secret in .env
+## Hero Examples
+
+### Example 1: Simple Rotation
+
+Rotate your OpenAI key every week and update your `.env` file:
 
 ```bash
-birch rotate MY_API_KEY --env dev
-```
+# Dev environment
+birch rotate OPENAI_API_KEY --env dev
 
-This updates `MY_API_KEY` in your `.env` file and saves a rollback copy to `.birch-rollback`.
-
-### Production Mode: Rotate a Secret on Vercel
-
-```bash
+# Production (Vercel)
 export VERCEL_TOKEN="your-token"
 export VERCEL_PROJECT_ID="your-project-id"
-
-birch rotate MY_API_KEY --env prod --service vercel --redeploy
+birch rotate OPENAI_API_KEY --env prod --service vercel --redeploy
 ```
 
-This updates the secret in Vercel and optionally triggers a redeploy.
+Schedule with cron:
 
-### Start the Daemon for App-Signal Rotation
+```bash
+0 2 * * 0 birch rotate OPENAI_API_KEY --env prod --service vercel
+```
+
+### Example 2: Rate-Limit Pool Cycling
+
+Use a pool of 5 API keys. On HTTP 429, automatically advance to the next key and rotate the exhausted key:
+
+**Step 1: Create the pool**
+
+```bash
+birch pool init TIKTOK_API_KEY \
+  --keys "sk_key1,sk_key2,sk_key3,sk_key4,sk_key5"
+```
+
+**Step 2: Start the daemon**
 
 ```bash
 birch daemon start
 ```
 
-The daemon listens on `127.0.0.1:9123` for rotation signals from your application:
-
-```bash
-curl -X POST http://127.0.0.1:9123/rotate \
-  -H "Content-Type: application/json" \
-  -d '{"secret_name": "MY_API_KEY", "env": "prod", "service": "vercel"}'
-```
-
-### Rollback a Secret
-
-```bash
-birch rollback MY_API_KEY --env prod --service vercel
-```
-
-### View Audit Logs
-
-```bash
-birch audit MY_API_KEY --env prod
-```
-
-### Key Pools for Automatic Rotation
-
-Set up a pool of API keys for automatic rotation when rate limits are hit:
-
-```bash
-# Create a pool with multiple keys
-birch pool init TIKTOK_API_KEY --keys "sk_key1,sk_key2,sk_key3"
-
-# Check pool status
-birch pool status TIKTOK_API_KEY
-
-# Rotate (automatically uses next available key from pool)
-birch rotate TIKTOK_API_KEY --env prod --service vercel
-```
-
-When your app hits a rate limit (HTTP 429), it can trigger automatic rotation:
+**Step 3: Integrate with your application**
 
 ```javascript
+// Your app detects 429
 if (response.status === 429) {
   await fetch('http://localhost:9123/rotate', {
     method: 'POST',
@@ -114,14 +111,11 @@ if (response.status === 429) {
       service: 'vercel'
     })
   });
+  // Retry request with new key
 }
 ```
 
-See [Key Pool Documentation](./docs/content/docs/usage/key-pools.mdx) for details.
-
-### Zero-Config SDK
-
-For even simpler integration, use the `@inaplight/birch-client` SDK that automatically handles rate limits:
+**Step 4: Use the SDK for zero-config integration**
 
 ```bash
 npm install @inaplight/birch-client
@@ -130,6 +124,7 @@ npm install @inaplight/birch-client
 ```typescript
 import '@inaplight/birch-client/auto';
 
+// SDK automatically detects 429s, rotates keys, and retries
 const response = await fetch('https://api.tiktok.com/v1/videos', {
   headers: {
     Authorization: `Bearer ${process.env.TIKTOK_API_KEY}`
@@ -137,13 +132,57 @@ const response = await fetch('https://api.tiktok.com/v1/videos', {
 });
 ```
 
-That's it! The SDK automatically:
-- Detects which API keys are being used
-- Intercepts 429 responses
-- Rotates to the next key in the pool
-- Retries the request immediately
+### Example 3: Host Integration with Rollback
 
-Works with Next.js, Express, vanilla Node.js, and any framework. See [SDK Documentation](./docs/content/docs/sdk.mdx) for details.
+Rotate production key on Fly.io, update secret store, trigger redeploy, with automatic rollback support:
+
+```bash
+export FLY_API_TOKEN="your-token"
+export FLY_APP_NAME="your-app"
+
+# Dry-run first
+birch rotate STRIPE_SECRET_KEY --env prod --service fly --dry-run
+
+# Execute rotation
+birch rotate STRIPE_SECRET_KEY --env prod --service fly --redeploy
+
+# If something breaks, rollback within the window (default: 1 hour)
+birch rollback STRIPE_SECRET_KEY --env prod --service fly --redeploy
+```
+
+## Features
+
+### Key Pools
+
+Pre-configure multiple API keys for automatic sequential rotation. When a rate limit is detected, Birch switches to the next available key, marks the exhausted key for rotation, and continues serving traffic. Ideal for TikTok, Twitter, Stripe, OpenAI, SendGrid, and other rate-limited APIs.
+
+### Dev Mode
+
+Update `.env` files atomically with rollback support. Perfect for local development and testing.
+
+### Production Mode
+
+Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare Workers, Fly.io) and cloud secret managers (AWS Secrets Manager, GCP Secret Manager, Azure Key Vault). Update secrets and optionally trigger redeployments.
+
+### App-Signal Rotation
+
+Accept rotation requests from applications on rate limits or other triggers. Run the daemon and let your application signal rotations as needed.
+
+### Manual and Scheduled
+
+Operator-triggered rotations and cron-friendly commands. Perfect for scheduled rotations and manual interventions.
+
+### Rollback
+
+Time-boxed rollback with automatic key revocation. Rollback within the configured window (default: 1 hour) to restore previous secrets.
+
+### Audit Logging
+
+Cryptographically signed logs with Ed25519. Every rotation is logged with timestamp, actor, action, and signature for compliance and forensics.
+
+### Safety Rails
+
+Single-writer locks prevent concurrent rotations. Cooldowns prevent rapid successive rotations. Dry-run mode previews changes. Maintenance windows restrict production changes to specific times.
 
 ## Configuration
 
@@ -176,6 +215,7 @@ Environment variables override config file settings:
 ## Supported Providers
 
 ### Hosting Providers
+
 - **Vercel**: Requires `VERCEL_TOKEN` and `VERCEL_PROJECT_ID`
 - **Netlify**: Requires `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`
 - **Render**: Requires `RENDER_API_KEY` and `RENDER_SERVICE_ID`
@@ -183,6 +223,7 @@ Environment variables override config file settings:
 - **Fly.io**: Requires `FLY_API_TOKEN` and `FLY_APP_NAME`
 
 ### Cloud Secret Managers
+
 - **AWS Secrets Manager**: Requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION`
 - **GCP Secret Manager**: Requires `GOOGLE_APPLICATION_CREDENTIALS` and `GCP_PROJECT_ID`
 - **Azure Key Vault**: Requires `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, and `AZURE_VAULT_NAME`
@@ -204,7 +245,9 @@ Complete documentation is available in the `docs` directory, powered by Fumadocs
 
 Quick links:
 - [Quick Start Guide](./docs/content/docs/quick-start.mdx)
+- [Key Pools](./docs/content/docs/usage/key-pools.mdx)
 - [Operator Runbook](./docs/content/docs/operators/runbook.mdx)
+- [Invariants and Guarantees](./docs/content/docs/operators/invariants.mdx)
 - [CLI Reference](./docs/content/docs/cli-reference.mdx)
 
 To run the documentation locally:
@@ -230,4 +273,3 @@ No traffic proxying. No central secret storage. Just direct updates to your `.en
 ## License
 
 MIT
-
