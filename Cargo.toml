@@ -55,6 +55,9 @@ base64 = "0.22"
 tempfile = "3.12"
 mockito = "1.5"
 
+[patch.crates-io]
+base64ct = "=1.7.3"
+
 [profile.release]
 strip = true
 lto = true
