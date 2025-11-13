@@ -1,7 +1,7 @@
+use crate::pool::KeyPool;
 use anyhow::Result;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use chrono::{DateTime, Utc};
-use crate::pool::KeyPool;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -156,9 +156,9 @@ async fn handle_rotate(
             exhausted_keys: pool.count_exhausted(),
             current_index: pool.current_index,
         });
-        
+
         let next_value = pool.get_next_available().ok();
-        
+
         (status, next_value)
     } else {
         (None, None)
@@ -308,9 +308,7 @@ async fn handle_audit(
 ) -> impl IntoResponse {
     let secret_name = params.get("secret_name").cloned();
     let env = params.get("env").cloned();
-    let last = params
-        .get("last")
-        .and_then(|s| s.parse::<usize>().ok());
+    let last = params.get("last").and_then(|s| s.parse::<usize>().ok());
 
     let logger = match crate::audit::AuditLogger::new() {
         Ok(l) => l,

@@ -79,7 +79,9 @@ impl crate::connectors::Connector for CloudflareConnector {
     }
 
     async fn get_secret(&self, _name: &str) -> Result<String> {
-        anyhow::bail!("Cloudflare Workers secrets cannot be read via API (they are write-only for security)")
+        anyhow::bail!(
+            "Cloudflare Workers secrets cannot be read via API (they are write-only for security)"
+        )
     }
 
     async fn trigger_refresh(&self, _service: Option<&str>) -> Result<()> {

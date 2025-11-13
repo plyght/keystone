@@ -1,6 +1,6 @@
+use crate::pool;
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use crate::pool;
 
 #[derive(Parser)]
 #[command(name = "birch")]
@@ -182,24 +182,21 @@ pub async fn run() -> Result<()> {
             None => crate::config::show_config().await,
         },
         Commands::Pool { action } => match action {
-            PoolAction::Init { secret_name, keys, from_file } => {
-                pool::pool_init(secret_name, keys, from_file).await
-            }
-            PoolAction::Add { secret_name, key } => {
-                pool::pool_add(secret_name, key).await
-            }
-            PoolAction::List { secret_name } => {
-                pool::pool_list(secret_name).await
-            }
+            PoolAction::Init {
+                secret_name,
+                keys,
+                from_file,
+            } => pool::pool_init(secret_name, keys, from_file).await,
+            PoolAction::Add { secret_name, key } => pool::pool_add(secret_name, key).await,
+            PoolAction::List { secret_name } => pool::pool_list(secret_name).await,
             PoolAction::Remove { secret_name, index } => {
                 pool::pool_remove(secret_name, index).await
             }
-            PoolAction::Import { secret_name, from_file } => {
-                pool::pool_import(secret_name, from_file).await
-            }
-            PoolAction::Status { secret_name } => {
-                pool::pool_status(secret_name).await
-            }
+            PoolAction::Import {
+                secret_name,
+                from_file,
+            } => pool::pool_import(secret_name, from_file).await,
+            PoolAction::Status { secret_name } => pool::pool_status(secret_name).await,
         },
         Commands::DaemonInternalRun { bind } => crate::daemon::run_daemon(bind).await,
     }

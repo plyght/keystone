@@ -37,18 +37,19 @@ impl AzureConnector {
 
         let http_client = azure_core::new_http_client();
         let authority_host = "https://login.microsoftonline.com";
-        
-        let credential: Arc<dyn TokenCredential> = Arc::new(
-            ClientSecretCredential::new(
-                http_client,
-                authority_host.parse().unwrap(),
-                tenant_id.clone(),
-                client_id.clone(),
-                client_secret.clone(),
-            )
-        );
 
-        Ok(Self { credential, vault_url })
+        let credential: Arc<dyn TokenCredential> = Arc::new(ClientSecretCredential::new(
+            http_client,
+            authority_host.parse().unwrap(),
+            tenant_id.clone(),
+            client_id.clone(),
+            client_secret.clone(),
+        ));
+
+        Ok(Self {
+            credential,
+            vault_url,
+        })
     }
 }
 
@@ -80,7 +81,10 @@ impl crate::connectors::Connector for AzureConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("Note: Automatic refresh not implemented for Azure service: {}", svc);
+            println!(
+                "Note: Automatic refresh not implemented for Azure service: {}",
+                svc
+            );
             println!("Manually restart your service (e.g., App Service restart, Container Apps revision)");
         }
 
