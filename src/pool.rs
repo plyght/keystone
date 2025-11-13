@@ -376,6 +376,9 @@ pub async fn pool_status(secret_name: String) -> Result<()> {
     println!("Exhausted:       {}", pool.count_exhausted());
     println!();
     println!("Current index:   {}", pool.current_index);
+    if let Ok(Some(current_key)) = pool.get_current() {
+        println!("Current key:     {}", crate::connectors::mask_secret(&current_key));
+    }
     if let Some(last_rotation) = pool.last_rotation {
         println!("Last rotation:   {}", last_rotation.format("%Y-%m-%d %H:%M:%S UTC"));
     } else {

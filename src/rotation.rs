@@ -30,10 +30,10 @@ pub async fn rotate(
     let new_value = if let Some(v) = value {
         v
     } else if let Some(mut pool) = KeyPool::load(&secret_name)? {
-        println!("🎱 Using key pool for '{}' ({})", secret_name, 
-            format!("{} available, {} exhausted", 
-                pool.count_available(), 
-                pool.count_exhausted()));
+        println!("🎱 Using key pool for '{}' ({} available, {} exhausted)", 
+            secret_name,
+            pool.count_available(), 
+            pool.count_exhausted());
 
         if let Ok(current) = get_current_secret_value(&secret_name, &env, service.as_deref()).await {
             if let Ok(()) = pool.mark_exhausted(&current) {
@@ -81,15 +81,15 @@ pub async fn rotate(
         record_rotation(&env, &secret_name)?;
 
         let logger = crate::audit::AuditLogger::new()?;
-        logger.log_with_value(
-            secret_name.clone(),
-            env.clone(),
-            service.clone(),
-            crate::audit::AuditAction::Rotate,
-            true,
-            Some(masked),
-            Some(new_value.clone()),
-        )?;
+        logger.log_with_value(crate::audit::LogParams {
+            secret_name: secret_name.clone(),
+            env: env.clone(),
+            service: service.clone(),
+            action: crate::audit::AuditAction::Rotate,
+            success: true,
+            masked_secret_preview: Some(masked),
+            secret_value: Some(new_value.clone()),
+        })?;
 
         println!("✅ Secret rotated successfully");
     } else {

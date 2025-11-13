@@ -36,6 +36,17 @@ pub enum AuditAction {
     Signal,
 }
 
+#[derive(Debug, Clone)]
+pub struct LogParams {
+    pub secret_name: String,
+    pub env: String,
+    pub service: Option<String>,
+    pub action: AuditAction,
+    pub success: bool,
+    pub masked_secret_preview: Option<String>,
+    pub secret_value: Option<String>,
+}
+
 pub struct AuditLogger {
     signing_key: SigningKey,
     verifying_key: VerifyingKey,
@@ -99,33 +110,24 @@ impl AuditLogger {
         success: bool,
         masked_secret_preview: Option<String>,
     ) -> Result<()> {
-        self.log_with_value(
+        self.log_with_value(LogParams {
             secret_name,
             env,
             service,
             action,
             success,
             masked_secret_preview,
-            None,
-        )
+            secret_value: None,
+        })
     }
 
-    pub fn log_with_value(
-        &self,
-        secret_name: String,
-        env: String,
-        service: Option<String>,
-        action: AuditAction,
-        success: bool,
-        masked_secret_preview: Option<String>,
-        secret_value: Option<String>,
-    ) -> Result<()> {
+    pub fn log_with_value(&self, params: LogParams) -> Result<()> {
         let actor = std::env::var("USER")
             .or_else(|_| std::env::var("USERNAME"))
             .unwrap_or_else(|_| "unknown".to_string());
 
-        let encrypted_secret_value = if let Some(value) = secret_value {
-            Some(self.encrypt_secret(&value)?)
+        let encrypted_secret_value = if let Some(value) = &params.secret_value {
+            Some(self.encrypt_secret(value)?)
         } else {
             None
         };
@@ -133,12 +135,12 @@ impl AuditLogger {
         let entry = AuditEntry {
             timestamp: Utc::now(),
             actor,
-            secret_name,
-            env,
-            service,
-            action,
-            success,
-            masked_secret_preview,
+            secret_name: params.secret_name,
+            env: params.env,
+            service: params.service,
+            action: params.action,
+            success: params.success,
+            masked_secret_preview: params.masked_secret_preview,
             encrypted_secret_value,
             signature: String::new(),
         };

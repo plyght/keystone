@@ -66,6 +66,10 @@ export function getConfig(): BirchConfig {
   return globalConfig;
 }
 
+export function getConfigSafe(): BirchConfig | null {
+  return globalConfig;
+}
+
 export function setConfig(config: BirchConfig): void {
   globalConfig = config;
 }

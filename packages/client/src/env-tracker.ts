@@ -1,4 +1,4 @@
-import { getConfig } from './config';
+import { getConfigSafe } from './config';
 
 export class EnvTracker {
   private usedEnvVars = new Map<string, string>();
@@ -41,7 +41,8 @@ export class EnvTracker {
     
     for (const [key, value] of Object.entries(process.env)) {
       if (value === token && (key.includes('API_KEY') || key.includes('TOKEN') || key.includes('SECRET'))) {
-        if (getConfig().debug) {
+        const config = getConfigSafe();
+        if (config?.debug) {
           console.log(`[Birch] Detected env var: ${key} for token ***${token.slice(-4)}`);
         }
         return key;
@@ -49,7 +50,8 @@ export class EnvTracker {
     }
 
     const fallback = this.detectFromTokenPrefix(token);
-    if (fallback && getConfig().debug) {
+    const config = getConfigSafe();
+    if (fallback && config?.debug) {
       console.log(`[Birch] Fallback detection: ${fallback} for token prefix`);
     }
     return fallback;
