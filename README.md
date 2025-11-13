@@ -23,13 +23,7 @@ Most teams handle secret rotation with ad-hoc scripts, manual processes, or heav
 
 ## Installation
 
-### macOS (Homebrew)
-
-```bash
-brew install birch
-```
-
-### Linux / macOS (Binary)
+### Binary
 
 Download pre-built binaries from [releases](https://github.com/plyght/birch/releases).
 
