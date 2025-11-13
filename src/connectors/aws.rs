@@ -17,7 +17,7 @@ impl AwsConnector {
     pub fn new(config: &crate::config::Config) -> Result<Self> {
         let rt = tokio::runtime::Handle::try_current()
             .map_err(|_| anyhow::anyhow!("No tokio runtime available"))?;
-        
+
         rt.block_on(Self::new_async(config))
     }
 }
@@ -25,13 +25,7 @@ impl AwsConnector {
 #[async_trait]
 impl crate::connectors::Connector for AwsConnector {
     async fn update_secret(&self, name: &str, value: &str) -> Result<()> {
-        match self
-            .client
-            .describe_secret()
-            .secret_id(name)
-            .send()
-            .await
-        {
+        match self.client.describe_secret().secret_id(name).send().await {
             Ok(_) => {
                 self.client
                     .put_secret_value()
@@ -72,7 +66,10 @@ impl crate::connectors::Connector for AwsConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("Note: Automatic refresh not implemented for AWS service: {}", svc);
+            println!(
+                "Note: Automatic refresh not implemented for AWS service: {}",
+                svc
+            );
             println!("Manually restart your service (e.g., ECS task restart, Lambda update)");
         }
 

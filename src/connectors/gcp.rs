@@ -45,7 +45,7 @@ impl GcpConnector {
     pub fn new(config: &crate::config::Config) -> Result<Self> {
         let rt = tokio::runtime::Handle::try_current()
             .map_err(|_| anyhow::anyhow!("No tokio runtime available"))?;
-        
+
         rt.block_on(Self::new_async(config))
     }
 }
@@ -109,7 +109,9 @@ impl crate::connectors::Connector for GcpConnector {
                     .secrets_add_version(payload, secret_name)
                     .doit()
                     .await
-                    .map_err(|e| anyhow::anyhow!("Failed to add initial secret version in GCP: {}", e))?;
+                    .map_err(|e| {
+                        anyhow::anyhow!("Failed to add initial secret version in GCP: {}", e)
+                    })?;
             }
         }
 
@@ -141,8 +143,13 @@ impl crate::connectors::Connector for GcpConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("Note: Automatic refresh not implemented for GCP service: {}", svc);
-            println!("Manually restart your service (e.g., Cloud Run revision, Cloud Functions update)");
+            println!(
+                "Note: Automatic refresh not implemented for GCP service: {}",
+                svc
+            );
+            println!(
+                "Manually restart your service (e.g., Cloud Run revision, Cloud Functions update)"
+            );
         }
 
         Ok(())

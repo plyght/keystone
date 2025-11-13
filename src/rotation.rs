@@ -1,6 +1,6 @@
+use crate::pool::KeyPool;
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
-use crate::pool::KeyPool;
 use std::fs;
 
 #[allow(clippy::too_many_arguments)]
@@ -30,12 +30,15 @@ pub async fn rotate(
     let new_value = if let Some(v) = value {
         v
     } else if let Some(mut pool) = KeyPool::load(&secret_name)? {
-        println!("🎱 Using key pool for '{}' ({} available, {} exhausted)", 
+        println!(
+            "🎱 Using key pool for '{}' ({} available, {} exhausted)",
             secret_name,
-            pool.count_available(), 
-            pool.count_exhausted());
+            pool.count_available(),
+            pool.count_exhausted()
+        );
 
-        if let Ok(current) = get_current_secret_value(&secret_name, &env, service.as_deref()).await {
+        if let Ok(current) = get_current_secret_value(&secret_name, &env, service.as_deref()).await
+        {
             if let Ok(()) = pool.mark_exhausted(&current) {
                 println!("   ✓ Marked current key as exhausted");
             }
@@ -167,19 +170,23 @@ async fn get_current_secret_value(
         anyhow::bail!("Secret not found in .env file")
     } else {
         let config = crate::config::Config::load()?;
-        let service_name = service.ok_or_else(|| anyhow::anyhow!("--service is required for production"))?;
+        let service_name =
+            service.ok_or_else(|| anyhow::anyhow!("--service is required for production"))?;
 
-        let connector: Box<dyn crate::connectors::Connector> = match service_name.to_lowercase().as_str() {
-            "vercel" => Box::new(crate::connectors::vercel::VercelConnector::new(&config)?),
-            "netlify" => Box::new(crate::connectors::netlify::NetlifyConnector::new(&config)?),
-            "render" => Box::new(crate::connectors::render::RenderConnector::new(&config)?),
-            "cloudflare" => Box::new(crate::connectors::cloudflare::CloudflareConnector::new(&config)?),
-            "fly" => Box::new(crate::connectors::fly::FlyConnector::new(&config)?),
-            "aws" => Box::new(crate::connectors::aws::AwsConnector::new(&config)?),
-            "gcp" => Box::new(crate::connectors::gcp::GcpConnector::new(&config)?),
-            "azure" => Box::new(crate::connectors::azure::AzureConnector::new(&config)?),
-            _ => anyhow::bail!("Unknown service: {}", service_name),
-        };
+        let connector: Box<dyn crate::connectors::Connector> =
+            match service_name.to_lowercase().as_str() {
+                "vercel" => Box::new(crate::connectors::vercel::VercelConnector::new(&config)?),
+                "netlify" => Box::new(crate::connectors::netlify::NetlifyConnector::new(&config)?),
+                "render" => Box::new(crate::connectors::render::RenderConnector::new(&config)?),
+                "cloudflare" => Box::new(crate::connectors::cloudflare::CloudflareConnector::new(
+                    &config,
+                )?),
+                "fly" => Box::new(crate::connectors::fly::FlyConnector::new(&config)?),
+                "aws" => Box::new(crate::connectors::aws::AwsConnector::new(&config)?),
+                "gcp" => Box::new(crate::connectors::gcp::GcpConnector::new(&config)?),
+                "azure" => Box::new(crate::connectors::azure::AzureConnector::new(&config)?),
+                _ => anyhow::bail!("Unknown service: {}", service_name),
+            };
 
         connector.get_secret(secret_name).await
     }
