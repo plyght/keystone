@@ -2,15 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, master]
   pull_request:
-    branches: [ main ]
+    branches: [main, master]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  test-cli:
+    name: Test Rust CLI
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -55,10 +56,38 @@ jobs:
     - name: Check formatting
       run: cargo fmt -- --check
 
+  test-sdk:
+    name: Test TypeScript SDK
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      working-directory: packages/client
+      run: bun install
+    
+    - name: Build SDK
+      working-directory: packages/client
+      run: bun run build
+    
+    - name: Run tests
+      working-directory: packages/client
+      run: bun test
+
   build:
+    name: Build Release Artifacts
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test-cli, test-sdk]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
     - uses: actions/checkout@v4
@@ -66,19 +95,37 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     
-    - name: Build release
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Build CLI release
       run: cargo build --release --verbose
     
-    - name: Upload artifact
+    - name: Build SDK
+      working-directory: packages/client
+      run: |
+        bun install
+        bun run build
+    
+    - name: Upload CLI artifact
       uses: actions/upload-artifact@v4
       with:
-        name: keystone-linux-x86_64
-        path: target/release/keystone
+        name: birch-linux-x86_64
+        path: target/release/birch
+    
+    - name: Upload SDK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: birch-sdk
+        path: packages/client/dist/
 
   docker:
+    name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test-cli, test-sdk]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
     - uses: actions/checkout@v4
@@ -87,8 +134,4 @@ jobs:
       uses: docker/setup-buildx-action@v3
     
     - name: Build Docker image
-      run: docker build -t keystone:latest .
-    
-    - name: Test Docker image
-      run: docker run --rm keystone:latest --version
-
+      run: docker build -t birch:latest .
