@@ -151,7 +151,7 @@ birch pool init TIKTOK_API_KEY --from-file ./tiktok-keys.txt
 ```bash
 birch pool status TIKTOK_API_KEY
 # Pool: TIKTOK_API_KEY
-# Status: ✅ Ready
+# Status: Ready
 # Total keys:      3
 # Available:       3 (100%)
 ```
@@ -162,9 +162,9 @@ When you rotate, Birch automatically uses the pool:
 
 ```bash
 birch rotate TIKTOK_API_KEY --env prod --service vercel
-# 🎱 Using key pool for 'TIKTOK_API_KEY' (2 available, 1 exhausted)
-# ✓ Marked current key as exhausted
-# 🔄 Rotating secret 'TIKTOK_API_KEY' in env 'prod'
+# Using key pool for 'TIKTOK_API_KEY' (2 available, 1 exhausted)
+# Marked current key as exhausted
+# Rotating secret 'TIKTOK_API_KEY' in env 'prod'
 ```
 
 ### Automatic Rotation on Rate Limit
@@ -215,9 +215,9 @@ birch pool add TIKTOK_API_KEY --key "sk_new_key"
 
 ```bash
 birch pool list TIKTOK_API_KEY
-# 0: 🔴 Exhausted ***abc (last used: 2024-01-15 12:00:00)
-# 1: 🟢 Active ***xyz (last used: 2024-01-15 14:30:22)
-# 2: ⚪ Available ***def
+# 0: Exhausted ***abc (last used: 2024-01-15 12:00:00)
+# 1: Active ***xyz (last used: 2024-01-15 14:30:22)
+# 2: Available ***def
 ```
 
 #### Remove Exhausted Keys
@@ -246,7 +246,7 @@ birch pool import TIKTOK_API_KEY --from-file ./keys.txt
    # Check available keys and alert if < 2
    available=$(birch pool status TIKTOK_API_KEY | grep Available | awk '{print $2}')
    if [ "$available" -lt 2 ]; then
-     echo "⚠️ Low key pool: only $available keys remaining"
+     echo "Warning: Low key pool - only $available keys remaining"
    fi
    ```
 4. **Rotate pools regularly** even without rate limits

@@ -80,9 +80,8 @@ impl crate::connectors::Connector for AzureConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("ℹ️  Would trigger refresh for Azure service: {}", svc);
-            println!("   (e.g., App Service restart, Container Apps revision)");
-            println!("   Note: Automatic refresh not implemented - manually restart your service");
+            println!("Note: Automatic refresh not implemented for Azure service: {}", svc);
+            println!("Manually restart your service (e.g., App Service restart, Container Apps revision)");
         }
 
         Ok(())

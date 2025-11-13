@@ -1,16 +1,16 @@
 # @birch/client
 
-Zero-config automatic API key rotation for Node.js applications. Automatically detects rate limits and rotates to the next key in your pool - no code changes required.
+Zero-configuration automatic API key rotation for Node.js applications. Automatically detects rate limits and rotates to the next key in your pool with no code changes required.
 
 ## Features
 
 - **Zero Configuration**: Single import enables automatic rotation
-- **Zero Intrusion**: Works with existing `fetch()`, `axios`, and other HTTP clients
+- **Zero Intrusion**: Works with existing fetch, axios, and other HTTP clients
 - **Automatic Detection**: Detects which API keys are being used
 - **429 Handling**: Automatically rotates on rate limit responses
 - **Immediate Retry**: Retries failed requests with new keys
 - **Pool Support**: Manages multiple keys for each API
-- **Works Everywhere**: Dev, staging, and production
+- **Works Everywhere**: Development, staging, and production environments
 - **Debug Mode**: Optional verbose logging
 
 ## Installation
@@ -45,7 +45,7 @@ const response = await fetch('https://api.tiktok.com/v1/videos', {
 });
 ```
 
-That's it! When you hit a 429, Birch automatically:
+When you hit a 429 response, Birch automatically:
 1. Detects the API key being used
 2. Calls the Birch daemon to rotate
 3. Gets the next key from the pool
@@ -328,8 +328,8 @@ Enable debug mode to see detection:
 BIRCH_DEBUG=true node script.js
 ```
 
-The SDK may not recognize your token format. You can:
-1. Ensure your env var name includes `API_KEY`, `TOKEN`, or `SECRET`
+If the SDK does not recognize your token format:
+1. Ensure your environment variable name includes API_KEY, TOKEN, or SECRET
 2. Match the token value exactly in your environment
 
 ### Keys Not Rotating
@@ -355,5 +355,5 @@ MIT
 
 ## Contributing
 
-See the main [Birch repository](https://github.com/your-org/birch) for contribution guidelines.
+See the main Birch repository for contribution guidelines.
 

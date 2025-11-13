@@ -155,7 +155,7 @@ birch pool init TIKTOK_API_KEY --from-file ./keys.txt
 ```bash
 birch pool status TIKTOK_API_KEY
 # Pool: TIKTOK_API_KEY
-# Status: ✅ Ready
+# Status: Ready
 # Total keys:      3
 # Available:       3 (100%)
 ```
@@ -166,9 +166,9 @@ Now when you rotate, Birch will automatically use the next available key:
 
 ```bash
 birch rotate TIKTOK_API_KEY --env prod --service vercel
-# 🎱 Using key pool for 'TIKTOK_API_KEY' (2 available, 1 exhausted)
-# ✓ Marked current key as exhausted
-# 🔄 Rotating secret...
+# Using key pool for 'TIKTOK_API_KEY' (2 available, 1 exhausted)
+# Marked current key as exhausted
+# Rotating secret...
 ```
 
 ### Automatic Rotation on Rate Limits

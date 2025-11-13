@@ -141,9 +141,8 @@ impl crate::connectors::Connector for GcpConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("ℹ️  Would trigger refresh for GCP service: {}", svc);
-            println!("   (e.g., Cloud Run revision, Cloud Functions update)");
-            println!("   Note: Automatic refresh not implemented - manually restart your service");
+            println!("Note: Automatic refresh not implemented for GCP service: {}", svc);
+            println!("Manually restart your service (e.g., Cloud Run revision, Cloud Functions update)");
         }
 
         Ok(())

@@ -69,23 +69,25 @@ birch rotate SECRET_NAME --env ENV --service PROVIDER --dry-run
 
 | Provider | Status | Secret Update | Get Secret | Auto-Redeploy |
 |----------|--------|---------------|------------|---------------|
-| Vercel | ✅ Ready | ✅ | ❌ | ✅ |
-| Netlify | ✅ Ready | ✅ | ❌ | ✅ |
-| Render | ✅ Ready | ✅ | ❌ | ✅ |
-| Cloudflare | ✅ Ready | ✅ | ❌ | N/A* |
-| Fly.io | ✅ Ready | ✅ | ❌ | Auto** |
-| AWS | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
-| GCP | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
-| Azure | 🚧 Placeholder | 🚧 | 🚧 | 🚧 |
+| Vercel | Ready | Yes | No | Yes |
+| Netlify | Ready | Yes | No | Yes |
+| Render | Ready | Yes | No | Yes |
+| Cloudflare | Ready | Yes | No | N/A* |
+| Fly.io | Ready | Yes | No | Auto** |
+| AWS | Ready | Yes | Yes | Manual*** |
+| GCP | Ready | Yes | Yes | Manual*** |
+| Azure | Ready | Yes | Yes | Manual*** |
 
 \* Cloudflare Workers automatically use updated secrets on next invocation  
-\** Fly.io automatically restarts apps when secrets are updated
+\** Fly.io automatically restarts apps when secrets are updated  
+\*** Cloud secret managers update secrets but do not automatically trigger application restarts
 
 ## Notes
 
-- Most providers don't expose secret values via API for security
-- AWS/GCP/Azure connectors require native SDKs (placeholder implementations included)
-- Each provider has specific environment variable requirements
+- Most hosting providers do not expose secret values via API for security reasons
+- Cloud secret managers (AWS, GCP, Azure) support both reading and writing secrets
+- Hosting providers typically require manual service restarts or use their deployment APIs
+- Each provider has specific authentication requirements
 
 ## Next Steps
 

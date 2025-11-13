@@ -1,20 +1,46 @@
 ---
 title: Azure Key Vault Connector
-description: Rotate secrets in Azure Key Vault (Placeholder)
+description: Rotate secrets in Azure Key Vault
 ---
 
-⚠️ **Placeholder Implementation** - Requires Azure SDK for full functionality.
-
-## Status
-
-The Azure Key Vault connector is currently a placeholder that requires the official Azure SDK (`azure-security-keyvault`) for production use.
+Birch integrates with Azure Key Vault to update and retrieve secrets in your Azure environment.
 
 ## Prerequisites
 
 - Azure subscription with Key Vault
 - Service principal with appropriate permissions
+- Key Vault access policies configured
+
+## Required Permissions
+
+Your service principal needs these Key Vault permissions:
+
+- Secret permissions:
+  - Get
+  - Set
+  - List
 
 ## Setup
+
+Create a service principal:
+
+```bash
+az ad sp create-for-rbac --name birch-rotation \
+  --role "Key Vault Secrets Officer" \
+  --scopes /subscriptions/SUBSCRIPTION_ID/resourceGroups/RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/VAULT_NAME
+```
+
+This command will output the credentials you need:
+
+```json
+{
+  "appId": "your-client-id",
+  "password": "your-client-secret",
+  "tenant": "your-tenant-id"
+}
+```
+
+Configure credentials via environment variables:
 
 ```bash
 export AZURE_CLIENT_ID="your-client-id"
@@ -23,14 +49,56 @@ export AZURE_TENANT_ID="your-tenant-id"
 export AZURE_VAULT_NAME="your-vault-name"
 ```
 
-## Current Behavior
+Or use the configuration file:
 
-When you attempt to use the Azure connector, you'll see a placeholder message indicating the SDK is required.
+```toml
+[connector_auth]
+azure_client_id = "your-client-id"
+azure_client_secret = "your-client-secret"
+azure_tenant_id = "your-tenant-id"
+```
 
-## Implementation Required
+## Usage
 
-To complete this connector, add Azure SDK dependencies and implement:
-- Secret value updates
-- Secret retrieval
-- Service refresh triggers (App Service, Container Apps, etc.)
+Rotate a secret in Azure Key Vault:
+
+```bash
+birch rotate MY_SECRET_NAME --env prod --service azure
+```
+
+The connector will:
+1. Connect to the specified Key Vault
+2. Set or update the secret value
+3. Return the masked new value
+
+## Application Restart
+
+Azure Key Vault updates the secret value but does not automatically restart your applications. After rotation, you must manually restart services:
+
+```bash
+# Example: Restart App Service
+az webapp restart --name my-app --resource-group my-rg
+
+# Example: Restart Container Apps
+az containerapp revision restart \
+  --name my-app \
+  --resource-group my-rg \
+  --revision latest
+```
+
+## Rollback
+
+Rollback to the previous secret value:
+
+```bash
+birch rollback MY_SECRET_NAME --env prod --service azure
+```
+
+## Notes
+
+- Azure Key Vault automatically versions secrets
+- The connector uses client secret authentication
+- Managed identities are not currently supported
+- Automatic application restarts are not supported
+- Use hosting provider connectors for automatic redeployment
 

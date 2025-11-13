@@ -18,29 +18,15 @@ sudo cp target/release/birch /usr/local/bin/
 
 ## Pre-built Binaries
 
-Download pre-built binaries from the [releases page](https://github.com/plyght/birch/releases):
-
-```bash
-# Linux
-wget https://github.com/plyght/birch/releases/latest/download/birch-linux-x86_64
-chmod +x birch-linux-x86_64
-sudo mv birch-linux-x86_64 /usr/local/bin/birch
-
-# macOS
-wget https://github.com/plyght/birch/releases/latest/download/birch-darwin-x86_64
-chmod +x birch-darwin-x86_64
-sudo mv birch-darwin-x86_64 /usr/local/bin/birch
-
-# Windows
-# Download birch-windows-x86_64.exe and add to PATH
-```
+Pre-built binaries may be available on the [releases page](https://github.com/plyght/birch/releases) for supported platforms.
 
 ## Docker
 
-Run Birch in a container:
+Build and run Birch in a container:
 
 ```bash
-docker pull birch:latest
+# Build the Docker image
+docker build -t birch:latest .
 
 # Run a command
 docker run --rm birch:latest --help

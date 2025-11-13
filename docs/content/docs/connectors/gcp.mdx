@@ -1,34 +1,102 @@
 ---
 title: GCP Secret Manager Connector
-description: Rotate secrets in GCP Secret Manager (Placeholder)
+description: Rotate secrets in GCP Secret Manager
 ---
 
-⚠️ **Placeholder Implementation** - Requires GCP SDK for full functionality.
-
-## Status
-
-The GCP Secret Manager connector is currently a placeholder that requires the official GCP SDK (`google-secretmanager`) for production use.
+Birch integrates with GCP Secret Manager to update and retrieve secrets in your Google Cloud Platform project.
 
 ## Prerequisites
 
 - GCP project with Secret Manager API enabled
-- Service account with appropriate permissions
+- Service account with appropriate IAM permissions
+- Service account key JSON file
+
+## Required IAM Permissions
+
+Your service account needs the following roles or permissions:
+
+- `roles/secretmanager.admin` or
+- Custom role with these permissions:
+  - `secretmanager.secrets.create`
+  - `secretmanager.secrets.get`
+  - `secretmanager.versions.add`
+  - `secretmanager.versions.access`
 
 ## Setup
 
+Enable the Secret Manager API in your project:
+
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/credentials.json"
+gcloud services enable secretmanager.googleapis.com
+```
+
+Create a service account and download the key:
+
+```bash
+gcloud iam service-accounts create birch-rotation \
+  --display-name="Birch Secret Rotation"
+
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:birch-rotation@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.admin"
+
+gcloud iam service-accounts keys create ~/birch-gcp-key.json \
+  --iam-account=birch-rotation@PROJECT_ID.iam.gserviceaccount.com
+```
+
+Configure credentials via environment variables:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/birch-gcp-key.json"
 export GCP_PROJECT_ID="your-project-id"
 ```
 
-## Current Behavior
+Or use the configuration file:
 
-When you attempt to use the GCP connector, you'll see a placeholder message indicating the SDK is required.
+```toml
+[connector_auth]
+gcp_credentials_path = "/path/to/birch-gcp-key.json"
+```
 
-## Implementation Required
+## Usage
 
-To complete this connector, add GCP SDK dependencies and implement:
-- Secret value updates
-- Secret retrieval
-- Service refresh triggers (Cloud Run, Cloud Functions, etc.)
+Rotate a secret in GCP Secret Manager:
+
+```bash
+birch rotate MY_SECRET_NAME --env prod --service gcp
+```
+
+The connector will:
+1. Check if the secret exists in Secret Manager
+2. If it exists, add a new version with the updated value
+3. If it does not exist, create a new secret with automatic replication
+
+## Application Restart
+
+GCP Secret Manager updates the secret value but does not automatically restart your applications. After rotation, you must manually restart services:
+
+```bash
+# Example: Deploy new Cloud Run revision
+gcloud run deploy my-service --region=us-central1
+
+# Example: Update Cloud Function
+gcloud functions deploy my-function --update-env-vars MY_SECRET_NAME=new-value
+```
+
+For automatic secret mounting, consider using GCP Secret Manager integrations with Cloud Run and Cloud Functions.
+
+## Rollback
+
+Rollback to the previous secret version:
+
+```bash
+birch rollback MY_SECRET_NAME --env prod --service gcp
+```
+
+## Notes
+
+- Secrets are versioned automatically by GCP Secret Manager
+- The connector uses automatic replication by default
+- Automatic application restarts are not supported
+- Use hosting provider connectors for automatic redeployment
 

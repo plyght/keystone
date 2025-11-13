@@ -72,9 +72,8 @@ impl crate::connectors::Connector for AwsConnector {
 
     async fn trigger_refresh(&self, service: Option<&str>) -> Result<()> {
         if let Some(svc) = service {
-            println!("ℹ️  Would trigger refresh for AWS service: {}", svc);
-            println!("   (e.g., ECS task restart, Lambda update)");
-            println!("   Note: Automatic refresh not implemented - manually restart your service");
+            println!("Note: Automatic refresh not implemented for AWS service: {}", svc);
+            println!("Manually restart your service (e.g., ECS task restart, Lambda update)");
         }
 
         Ok(())

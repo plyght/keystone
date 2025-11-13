@@ -1,20 +1,40 @@
 ---
 title: AWS Secrets Manager Connector
-description: Rotate secrets in AWS Secrets Manager (Placeholder)
+description: Rotate secrets in AWS Secrets Manager
 ---
 
-⚠️ **Placeholder Implementation** - Requires AWS SDK for full functionality.
-
-## Status
-
-The AWS Secrets Manager connector is currently a placeholder that requires the official AWS SDK (`aws-sdk-secretsmanager`) for production use.
+Birch integrates with AWS Secrets Manager to update and retrieve secrets in your AWS account.
 
 ## Prerequisites
 
 - AWS account with Secrets Manager access
-- AWS credentials with appropriate IAM permissions
+- IAM credentials with appropriate permissions
+
+## Required IAM Permissions
+
+Your IAM user or role needs the following permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutSecretValue"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
 
 ## Setup
+
+Configure AWS credentials via environment variables:
 
 ```bash
 export AWS_ACCESS_KEY_ID="your-access-key"
@@ -22,28 +42,52 @@ export AWS_SECRET_ACCESS_KEY="your-secret-key"
 export AWS_REGION="us-east-1"
 ```
 
-## Current Behavior
+Or use the configuration file:
 
-When you attempt to use the AWS connector, you'll see:
-
-```
-⚠️  AWS Secrets Manager integration requires AWS SDK
-   Secret name: MY_SECRET
-   Region: us-east-1
-   This is a placeholder implementation
+```toml
+[connector_auth]
+aws_access_key_id = "your-access-key"
+aws_secret_access_key = "your-secret-key"
+aws_region = "us-east-1"
 ```
 
-## Implementation Required
+## Usage
 
-To complete this connector, add `aws-sdk-secretsmanager` dependency and implement:
-- Secret value updates
-- Secret retrieval
-- Service refresh triggers (ECS, Lambda, etc.)
+Rotate a secret in AWS Secrets Manager:
 
-## Workaround
+```bash
+birch rotate MY_SECRET_NAME --env prod --service aws
+```
 
-Until the full implementation is complete, you can:
-1. Use AWS CLI directly for secret rotation
-2. Implement a custom connector
-3. Contribute to the project by adding AWS SDK integration
+The connector will:
+1. Check if the secret exists in Secrets Manager
+2. If it exists, update the secret value
+3. If it does not exist, create a new secret with the provided value
+
+## Application Restart
+
+AWS Secrets Manager updates the secret value but does not automatically restart your applications. After rotation, you must manually restart services that use the rotated secret:
+
+```bash
+# Example: Restart ECS service
+aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment
+
+# Example: Update Lambda function
+aws lambda update-function-configuration --function-name my-function --environment Variables={MY_SECRET_NAME=new-value}
+```
+
+## Rollback
+
+Rollback to the previous secret value:
+
+```bash
+birch rollback MY_SECRET_NAME --env prod --service aws
+```
+
+## Notes
+
+- Secrets are versioned automatically by AWS Secrets Manager
+- The connector creates secrets if they do not exist
+- Automatic application restarts are not supported
+- Use hosting provider connectors (Vercel, Netlify, etc.) for automatic redeployment
 

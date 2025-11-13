@@ -73,7 +73,7 @@ birch pool status TIKTOK_API_KEY
 Output:
 ```
 Pool: TIKTOK_API_KEY
-Status: ✅ Ready
+Status: Ready
 
 Total keys:      4
 Available:       4 (100%)
@@ -96,11 +96,11 @@ birch rotate TIKTOK_API_KEY --env prod --service vercel
 
 Output:
 ```
-🎱 Using key pool for 'TIKTOK_API_KEY' (3 available, 1 exhausted)
-   ✓ Marked current key as exhausted
-🔄 Rotating secret 'TIKTOK_API_KEY' in env 'prod'
-   New value: ***xyz
-⚠️  Warning: Only 2 key(s) remaining in pool!
+Using key pool for 'TIKTOK_API_KEY' (3 available, 1 exhausted)
+Marked current key as exhausted
+Rotating secret 'TIKTOK_API_KEY' in env 'prod'
+New value: ***xyz
+Warning: Only 2 key(s) remaining in pool!
 ```
 
 ### Automatic Rotation via App Signal
@@ -256,11 +256,11 @@ Example output:
 ```
 Pool: TIKTOK_API_KEY
 ─────────────────────────────────────
-0: 🔴 Exhausted ***abc (last used: 2024-01-15 12:00:00)
-1: 🔴 Exhausted ***def (last used: 2024-01-15 13:15:00)
-2: 🟢 Active ***ghi (last used: 2024-01-15 14:30:22)
-3: ⚪ Available ***jkl
-4: ⚪ Available ***mno
+0: Exhausted ***abc (last used: 2024-01-15 12:00:00)
+1: Exhausted ***def (last used: 2024-01-15 13:15:00)
+2: Active ***ghi (last used: 2024-01-15 14:30:22)
+3: Available ***jkl
+4: Available ***mno
 ─────────────────────────────────────
 Total: 5 keys
 Available: 2 | Active: 1 | Exhausted: 2
@@ -350,7 +350,7 @@ for secret in "${SECRETS[@]}"; do
   if [ $? -eq 0 ]; then
     available=$(echo "$status" | grep "Available:" | awk '{print $2}')
     if [ "$available" -lt "$THRESHOLD" ]; then
-      echo "⚠️  LOW POOL: $secret has only $available keys remaining"
+      echo "WARNING: LOW POOL - $secret has only $available keys remaining"
       # Send alert (Slack, email, PagerDuty, etc.)
     fi
   fi
@@ -460,9 +460,9 @@ birch pool init SECRET_NAME --from-file ./keys.txt
 ### Scaling
 
 Pools scale well:
-- ✅ Up to 100 keys per pool: No performance impact
-- ⚠️  100-500 keys: Minor increase in load time
-- ❌ 500+ keys: Consider splitting into multiple secrets
+- Up to 100 keys per pool: No performance impact
+- 100-500 keys: Minor increase in load time
+- 500+ keys: Consider splitting into multiple secrets
 
 ### Memory Usage
 

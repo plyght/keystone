@@ -273,7 +273,7 @@ pub async fn pool_init(
 
     pool.save()?;
 
-    println!("✅ Created pool for '{}' with {} key(s)", secret_name, pool.keys.len());
+    println!("Created pool for '{}' with {} key(s)", secret_name, pool.keys.len());
     Ok(())
 }
 
@@ -284,7 +284,7 @@ pub async fn pool_add(secret_name: String, key: String) -> Result<()> {
     pool.add_key(key)?;
     pool.save()?;
 
-    println!("✅ Added key to pool '{}' (now {} total keys)", secret_name, pool.keys.len());
+    println!("Added key to pool '{}' (now {} total keys)", secret_name, pool.keys.len());
     Ok(())
 }
 
@@ -298,9 +298,9 @@ pub async fn pool_list(secret_name: String) -> Result<()> {
     let keys = pool.list_keys();
     for (index, status, last_used, masked_value) in keys {
         let status_str = match status {
-            KeyStatus::Active => "🟢 Active",
-            KeyStatus::Exhausted => "🔴 Exhausted",
-            KeyStatus::Available => "⚪ Available",
+            KeyStatus::Active => "Active",
+            KeyStatus::Exhausted => "Exhausted",
+            KeyStatus::Available => "Available",
         };
 
         print!("{}: {} {}", index, status_str, masked_value);
@@ -332,7 +332,7 @@ pub async fn pool_remove(secret_name: String, index: usize) -> Result<()> {
     pool.keys.remove(index);
     pool.save()?;
 
-    println!("✅ Removed key at index {} from pool '{}' ({} keys remaining)", 
+    println!("Removed key at index {} from pool '{}' ({} keys remaining)", 
         index, secret_name, pool.keys.len());
     Ok(())
 }
@@ -355,7 +355,7 @@ pub async fn pool_import(secret_name: String, from_file: String) -> Result<()> {
 
     pool.save()?;
 
-    println!("✅ Imported {} key(s) into pool '{}' (now {} total keys)", 
+    println!("Imported {} key(s) into pool '{}' (now {} total keys)", 
         count, secret_name, pool.keys.len());
     Ok(())
 }
@@ -365,7 +365,7 @@ pub async fn pool_status(secret_name: String) -> Result<()> {
         .ok_or_else(|| anyhow::anyhow!("Pool for '{}' does not exist", secret_name))?;
 
     println!("Pool: {}", secret_name);
-    println!("Status: {}", if pool.count_available() > 0 { "✅ Ready" } else { "⚠️  Exhausted" });
+    println!("Status: {}", if pool.count_available() > 0 { "Ready" } else { "Exhausted" });
     println!();
     println!("Total keys:      {}", pool.keys.len());
     println!("Available:       {} ({}%)", 
@@ -384,7 +384,7 @@ pub async fn pool_status(secret_name: String) -> Result<()> {
 
     if pool.count_available() <= 2 && pool.count_available() > 0 {
         println!();
-        println!("⚠️  Warning: Only {} key(s) remaining!", pool.count_available());
+        println!("Warning: Only {} key(s) remaining!", pool.count_available());
     }
 
     Ok(())

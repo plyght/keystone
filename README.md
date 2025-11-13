@@ -1,6 +1,6 @@
 # Birch
 
-**Peel. Rotate. Renew.**
+Peel. Rotate. Renew.
 
 Birch is an open-source CLI tool for safe, fast secret rotation. It updates local `.env` files and production host secrets by name, without proxying traffic. Your applications call provider APIs directly with their own keys.
 
@@ -8,9 +8,9 @@ Birch is an open-source CLI tool for safe, fast secret rotation. It updates loca
 
 - **Key Pools**: Pre-configure multiple API keys for automatic sequential rotation on rate limits
 - **Dev Mode**: Update `.env` files atomically with rollback support
-- **Production Mode**: Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare, Fly.io) and cloud secret managers (AWS, GCP, Azure)
-- **App-Signal Rotation**: Accept rotation requests from applications (e.g., on 429/rate-limit headers)
-- **Manual & Scheduled**: Operator-triggered and cron-friendly
+- **Production Mode**: Integrate with major hosting providers (Vercel, Netlify, Render, Cloudflare, Fly.io) and cloud secret managers (AWS Secrets Manager, GCP Secret Manager, Azure Key Vault)
+- **App-Signal Rotation**: Accept rotation requests from applications on rate limits or other triggers
+- **Manual and Scheduled**: Operator-triggered and cron-friendly
 - **Rollback**: Time-boxed rollback with automatic key revocation
 - **Audit Logging**: Cryptographically signed logs with Ed25519
 - **Safety Rails**: Single-writer locks, cooldowns, dry-run mode, maintenance windows
@@ -175,9 +175,11 @@ Environment variables override config file settings:
 - **Fly.io**: Requires `FLY_API_TOKEN` and `FLY_APP_NAME`
 
 ### Cloud Secret Managers
-- **AWS Secrets Manager**: Requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` (placeholder implementation)
-- **GCP Secret Manager**: Requires `GOOGLE_APPLICATION_CREDENTIALS` and `GCP_PROJECT_ID` (placeholder implementation)
-- **Azure Key Vault**: Requires `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, and `AZURE_VAULT_NAME` (placeholder implementation)
+- **AWS Secrets Manager**: Requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION`
+- **GCP Secret Manager**: Requires `GOOGLE_APPLICATION_CREDENTIALS` and `GCP_PROJECT_ID`
+- **Azure Key Vault**: Requires `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, and `AZURE_VAULT_NAME`
+
+Note: Cloud secret managers update secrets directly but do not automatically trigger application restarts. Restart your services manually or use the hosting provider connectors for automatic redeployment.
 
 ## Safety Features
 
@@ -190,14 +192,14 @@ Environment variables override config file settings:
 
 ## Documentation
 
-📚 **[Full Documentation](./docs)** - Complete documentation powered by Fumadocs
+Complete documentation is available in the `docs` directory, powered by Fumadocs.
 
 Quick links:
 - [Quick Start Guide](./docs/content/docs/quick-start.mdx)
 - [Operator Runbook](./docs/content/docs/operators/runbook.mdx)
 - [CLI Reference](./docs/content/docs/cli-reference.mdx)
 
-To run the docs locally:
+To run the documentation locally:
 
 ```bash
 cd docs
@@ -205,7 +207,7 @@ bun install
 bun run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000)
+Then open http://localhost:3000
 
 ## Architecture
 

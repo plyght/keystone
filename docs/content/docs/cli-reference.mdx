@@ -256,9 +256,9 @@ birch pool list TIKTOK_API_KEY
 # Output:
 # Pool: TIKTOK_API_KEY
 # ─────────────────────────────────────
-# 0: 🟢 Active ***abc (last used: 2024-01-15 14:30:22)
-# 1: ⚪ Available ***xyz
-# 2: 🔴 Exhausted ***def (last used: 2024-01-15 12:15:10)
+# 0: Active ***abc (last used: 2024-01-15 14:30:22)
+# 1: Available ***xyz
+# 2: Exhausted ***def (last used: 2024-01-15 12:15:10)
 # ─────────────────────────────────────
 # Total: 3 keys
 # Available: 1 | Active: 1 | Exhausted: 1
@@ -322,7 +322,7 @@ birch pool status <SECRET_NAME>
 birch pool status TIKTOK_API_KEY
 # Output:
 # Pool: TIKTOK_API_KEY
-# Status: ✅ Ready
+# Status: Ready
 #
 # Total keys:      5
 # Available:       3 (60%)
@@ -396,18 +396,5 @@ See [Configuration](/docs/configuration) for full details.
 
 ## Shell Completion
 
-Generate shell completion scripts:
-
-```bash
-# Bash
-birch completions bash > /etc/bash_completion.d/birch
-
-# Zsh
-birch completions zsh > /usr/local/share/zsh/site-functions/_birch
-
-# Fish
-birch completions fish > ~/.config/fish/completions/birch.fish
-```
-
-*Note: Completion generation not yet implemented*
+Shell completion support is planned for a future release.
 

@@ -1,33 +1,37 @@
 # Birch Documentation
 
-This is the Fumadocs-powered documentation site for Birch.
+Documentation site for Birch, powered by Fumadocs.
 
 ## Development
+
+Start the development server:
 
 ```bash
 bun install
 bun run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Then open http://localhost:3000
 
 ## Build
+
+Build for production:
 
 ```bash
 bun run build
 bun run start
 ```
 
-## Content
+## Content Structure
 
 Documentation content is located in `content/docs/`:
 
 - **Getting Started**: index.mdx, installation.mdx, quick-start.mdx
-- **SDK**: sdk/ folder (getting-started, installation, configuration, api-reference, examples, frameworks)
+- **SDK**: sdk/ folder with getting-started, installation, configuration, api-reference, examples, and frameworks
 - **Configuration**: configuration.mdx
-- **Usage**: usage.mdx and usage/ folder
-- **Operators**: operators/ folder
-- **Connectors**: connectors/ folder
+- **Usage**: usage.mdx and usage/ folder with app-signals and key-pools guides
+- **Operators**: operators/ folder with runbook, incident-checklist, and rotation-checklist
+- **Connectors**: connectors/ folder with provider-specific guides
 - **CLI Reference**: cli-reference.mdx
 
 ## Adding Content
@@ -47,8 +51,8 @@ Your content here...
 
 Update `meta.json` files to control navigation order.
 
-## Powered By
+## Technology Stack
 
-- [Fumadocs](https://fumadocs.dev) - Documentation framework
-- [Next.js](https://nextjs.org) - React framework
-- [Tailwind CSS](https://tailwindcss.com) - Styling
+- Fumadocs - Documentation framework
+- Next.js - React framework
+- Tailwind CSS - Styling

@@ -29,7 +29,7 @@ clean:
 
 install: release
 	sudo cp target/release/birch /usr/local/bin/
-	@echo "✅ Installed to /usr/local/bin/birch"
+	@echo "Installed to /usr/local/bin/birch"
 
 docker:
 	docker build -t birch:latest .
