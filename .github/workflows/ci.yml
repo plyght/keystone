@@ -91,16 +91,16 @@ jobs:
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     
     - name: Build
-      run: cargo build --manifest-path services/api/Cargo.toml --verbose
+      run: cargo build --manifest-path apps/api/Cargo.toml --verbose
     
     - name: Run tests
-      run: cargo test --manifest-path services/api/Cargo.toml --verbose
+      run: cargo test --manifest-path apps/api/Cargo.toml --verbose
     
     - name: Run clippy
-      run: cargo clippy --manifest-path services/api/Cargo.toml -- -D warnings
+      run: cargo clippy --manifest-path apps/api/Cargo.toml -- -D warnings
     
     - name: Check formatting
-      run: cargo fmt --manifest-path services/api/Cargo.toml -- --check
+      run: cargo fmt --manifest-path apps/api/Cargo.toml -- --check
 
   test-sdk:
     name: Test TypeScript SDK
@@ -180,4 +180,4 @@ jobs:
       uses: docker/setup-buildx-action@v3
     
     - name: Build Docker image
-      run: docker build -f services/api/Dockerfile -t birch:latest .
+      run: docker build -f apps/api/Dockerfile -t birch:latest .
