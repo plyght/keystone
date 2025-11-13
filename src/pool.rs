@@ -450,3 +450,26 @@ pub async fn pool_status(secret_name: String) -> Result<()> {
 
     Ok(())
 }
+
+pub fn list_all_pools() -> Result<Vec<String>> {
+    let pools_dir = KeyPool::pools_dir();
+    let mut pool_names = Vec::new();
+
+    if !pools_dir.exists() {
+        return Ok(pool_names);
+    }
+
+    for entry in fs::read_dir(&pools_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.extension().and_then(|s| s.to_str()) == Some("json") {
+            if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
+                pool_names.push(name.to_string());
+            }
+        }
+    }
+
+    pool_names.sort();
+    Ok(pool_names)
+}

@@ -122,6 +122,34 @@ curl http://127.0.0.1:9123/health
 
 Expected response: `OK` with status 200.
 
+### Interactive Dashboard
+
+Launch the TUI dashboard for real-time monitoring:
+
+```bash
+birch dashboard
+```
+
+The dashboard provides:
+- **Live daemon status**: Running/stopped, PID, bind address
+- **Scrollable audit logs**: Last 50 rotation events with timestamps
+- **Pool health overview**: Status of all key pools with availability indicators
+- **Metrics**: Total rotations, success rate, failures
+
+**Keyboard controls:**
+- `q` - Exit dashboard
+- `r` - Force refresh (auto-refreshes every 5s)
+- `↑`/`↓` - Scroll audit logs
+- `Page Up`/`Page Down` - Fast scroll
+
+**Use cases:**
+- Monitor daemon uptime
+- Track rotation success/failure in real-time
+- Identify pool exhaustion issues
+- Quick overview of system health
+
+**Tip**: Run the dashboard in a tmux/screen session for persistent monitoring.
+
 ### Audit Logs
 
 Review recent rotations:

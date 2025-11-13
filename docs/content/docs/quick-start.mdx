@@ -128,6 +128,24 @@ birch audit --last 10
 birch audit MY_API_KEY --env prod
 ```
 
+## Monitor with Dashboard
+
+Launch the interactive dashboard to monitor all Birch operations in real-time:
+
+```bash
+birch dashboard
+```
+
+The dashboard provides a comprehensive view of:
+- Daemon status (running/stopped, PID)
+- Recent audit logs with success/failure indicators
+- Key pool health and availability
+- Rotation metrics and success rates
+
+**Tip**: Keep the dashboard running in a separate terminal while performing rotations to monitor their status in real-time.
+
+Press `q` to quit, `r` to refresh, or use arrow keys to scroll through logs.
+
 ## Advanced: Set Up Key Pools (Optional)
 
 For APIs with rate limits, you can set up a pool of keys for automatic rotation:

@@ -174,6 +174,10 @@ Time-boxed rollback with automatic key revocation. Rollback within the configure
 
 Cryptographically signed logs with Ed25519. Every rotation is logged with timestamp, actor, action, and signature for compliance and forensics.
 
+### Interactive Dashboard
+
+Real-time TUI dashboard for monitoring operations. View daemon status, audit logs, pool health, and rotation metrics in a clean terminal interface. Navigate with keyboard shortcuts, auto-refreshes every 5 seconds.
+
 ### Safety Rails
 
 Single-writer locks prevent concurrent rotations. Cooldowns prevent rapid successive rotations. Dry-run mode previews changes. Maintenance windows restrict production changes to specific times.
