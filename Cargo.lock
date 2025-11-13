@@ -842,6 +842,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "birch-api"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "argon2",
+ "async-trait",
+ "axum",
+ "base64 0.22.1",
+ "birch",
+ "chacha20poly1305",
+ "chrono",
+ "deadpool-postgres",
+ "hex",
+ "jsonwebtoken",
+ "rand 0.8.5",
+ "redis",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-postgres",
+ "tower 0.4.13",
+ "tower-http 0.5.2",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2418,36 +2448,6 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_asn1",
-]
-
-[[package]]
-name = "keystone-api"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argon2",
- "async-trait",
- "axum",
- "base64 0.22.1",
- "birch",
- "chacha20poly1305",
- "chrono",
- "deadpool-postgres",
- "hex",
- "jsonwebtoken",
- "rand 0.8.5",
- "redis",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tokio-postgres",
- "tower 0.4.13",
- "tower-http 0.5.2",
- "tracing",
- "tracing-subscriber",
- "uuid",
 ]
 
 [[package]]

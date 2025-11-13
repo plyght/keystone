@@ -37,9 +37,9 @@ struct CreateProviderConfigRequest {
 }
 
 pub async fn login(api_url: Option<String>) -> Result<()> {
-    let url = api_url.unwrap_or_else(|| "https://api.keystone.birch.sh".to_string());
+    let url = api_url.unwrap_or_else(|| "https://api.birch.sh".to_string());
 
-    println!("Login to Keystone SaaS");
+    println!("Login to Birch SaaS");
     println!("API URL: {}", url);
     println!();
     println!("Please provide your API key:");
@@ -54,7 +54,7 @@ pub async fn login(api_url: Option<String>) -> Result<()> {
     config.saas_api_key = Some(api_key);
     config.save()?;
 
-    println!("✓ Successfully logged in to Keystone SaaS");
+    println!("✓ Successfully logged in to Birch SaaS");
     println!("  API URL: {}", url);
 
     Ok(())

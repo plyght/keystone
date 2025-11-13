@@ -1,6 +1,6 @@
-# Keystone API
+# Birch API
 
-Backend API service for Keystone SaaS, built with Rust and Axum.
+Backend API service for Birch SaaS, built with Rust and Axum.
 
 ## Architecture
 
@@ -55,7 +55,7 @@ supabase migration up
 ### Start the Server
 
 ```bash
-cargo run --bin keystone-api
+cargo run --bin birch-api
 ```
 
 The API will be available at `http://localhost:3000`.
@@ -118,7 +118,7 @@ All requests require authentication via Bearer token:
 
 ```bash
 curl -H "Authorization: Bearer <your-api-key>" \
-  https://api.keystone.birch.sh/api/v1/workspaces
+  https://api.birch.sh/api/v1/workspaces
 ```
 
 ## Testing
@@ -176,8 +176,8 @@ src/
 ### Docker
 
 ```bash
-docker build -t keystone-api .
-docker run -p 3000:3000 --env-file .env keystone-api
+docker build -t birch-api .
+docker run -p 3000:3000 --env-file .env birch-api
 ```
 
 ### Fly.io

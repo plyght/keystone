@@ -1,14 +1,14 @@
 [package]
-name = "keystone-api"
+name = "birch-api"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "keystone_api"
+name = "birch_api"
 path = "src/lib.rs"
 
 [[bin]]
-name = "keystone-api"
+name = "birch-api"
 path = "src/main.rs"
 
 [dependencies]

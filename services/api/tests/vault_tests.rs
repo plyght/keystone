@@ -7,7 +7,7 @@ fn test_vault_encryption_decryption() {
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     );
 
-    let encryption = keystone_api::vault::encryption::VaultEncryption::new()
+    let encryption = birch_api::vault::encryption::VaultEncryption::new()
         .expect("Failed to create encryption");
 
     let workspace_id = Uuid::new_v4();
@@ -36,7 +36,7 @@ fn test_vault_encryption_decryption() {
 
 #[test]
 fn test_credential_mode_parsing() {
-    use keystone_api::credentials::modes::CredentialMode;
+    use birch_api::credentials::modes::CredentialMode;
     use std::str::FromStr;
 
     assert_eq!(
@@ -60,7 +60,7 @@ fn test_credential_mode_parsing() {
 
 #[test]
 fn test_api_key_generation() {
-    use keystone_api::auth::api_keys::ApiKeyService;
+    use birch_api::auth::api_keys::ApiKeyService;
 
     let key1 = ApiKeyService::generate_api_key();
     let key2 = ApiKeyService::generate_api_key();
@@ -73,7 +73,7 @@ fn test_api_key_generation() {
 
 #[test]
 fn test_api_key_hashing_and_verification() {
-    use keystone_api::auth::api_keys::ApiKeyService;
+    use birch_api::auth::api_keys::ApiKeyService;
 
     let api_key = "sk_test_key_12345";
 
@@ -86,8 +86,8 @@ fn test_api_key_hashing_and_verification() {
 
 #[test]
 fn test_rbac_permissions() {
-    use keystone_api::workspace::models::Role;
-    use keystone_api::workspace::rbac::Permission;
+    use birch_api::workspace::models::Role;
+    use birch_api::workspace::rbac::Permission;
 
     let owner = Role::Owner;
     assert!(owner.has_permission(Permission::Rotate));
@@ -110,7 +110,7 @@ fn test_rbac_permissions() {
 
 #[test]
 fn test_plan_tier_rotation_limits() {
-    use keystone_api::workspace::models::PlanTier;
+    use birch_api::workspace::models::PlanTier;
 
     assert_eq!(PlanTier::Free.rotation_limit(), Some(100));
     assert_eq!(PlanTier::Starter.rotation_limit(), Some(1000));

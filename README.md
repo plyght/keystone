@@ -21,9 +21,9 @@ Most teams handle secret rotation with ad-hoc scripts, manual processes, or heav
 | Host integrations | Yes | Yes | Script only | Yes |
 | Zero SaaS dependency | Yes | No | Yes | No |
 
-## Keystone: SaaS Extension
+## Birch SaaS Extension
 
-**Keystone** extends Birch with a SaaS offering for teams needing policy orchestration, collaboration, and enterprise features—while keeping everything open source.
+**Birch SaaS** extends Birch with a SaaS offering for teams needing policy orchestration, collaboration, and enterprise features—while keeping everything open source.
 
 **Three modes:**
 - **Self-Hosted (OSS)** - Free, unlimited, CLI-only (the Birch you know)
@@ -45,7 +45,7 @@ birch saas workspace create "My Team"
 birch saas provider set vercel --mode hosted
 ```
 
-See [docs/keystone](./docs/content/docs/keystone/) for full documentation.
+See [docs/saas](./docs/content/docs/saas/) for full documentation.
 
 ## Installation
 
