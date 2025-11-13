@@ -12,6 +12,7 @@
 
 # Node.js
 node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -41,3 +42,7 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Binary files (native modules)
+*.node
+*.so
+*.dylib
