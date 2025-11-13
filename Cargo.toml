@@ -51,6 +51,8 @@ azure_security_keyvault = "0.20"
 azure_identity = "0.20"
 base64 = "0.22"
 base64ct = "=1.7.3"
+ratatui = "0.29"
+crossterm = "0.28"
 
 [dev-dependencies]
 tempfile = "3.12"

@@ -100,11 +100,11 @@ pub async fn run_daemon(bind: String) -> Result<()> {
     Ok(())
 }
 
-fn get_pid_file() -> std::path::PathBuf {
+pub fn get_pid_file() -> std::path::PathBuf {
     crate::config::Config::birch_dir().join("daemon.pid")
 }
 
-fn is_process_running(pid: u32) -> bool {
+pub fn is_process_running(pid: u32) -> bool {
     #[cfg(unix)]
     {
         use std::process::Command;
@@ -125,4 +125,34 @@ fn is_process_running(pid: u32) -> bool {
             .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
             .unwrap_or(false)
     }
+}
+
+pub struct DaemonStatus {
+    pub running: bool,
+    pub pid: Option<u32>,
+    pub bind_address: String,
+}
+
+pub fn get_daemon_status() -> Result<DaemonStatus> {
+    let pid_file = get_pid_file();
+    let config = crate::config::Config::load()?;
+
+    if !pid_file.exists() {
+        return Ok(DaemonStatus {
+            running: false,
+            pid: None,
+            bind_address: config.daemon_bind,
+        });
+    }
+
+    let pid_str = fs::read_to_string(&pid_file)?;
+    let pid: u32 = pid_str.trim().parse()?;
+
+    let running = is_process_running(pid);
+
+    Ok(DaemonStatus {
+        running,
+        pid: if running { Some(pid) } else { None },
+        bind_address: config.daemon_bind,
+    })
 }

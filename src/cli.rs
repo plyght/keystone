@@ -80,6 +80,8 @@ pub enum Commands {
         action: PoolAction,
     },
 
+    Dashboard,
+
     #[command(hide = true)]
     DaemonInternalRun {
         #[arg(long, default_value = "127.0.0.1:9123")]
@@ -198,6 +200,7 @@ pub async fn run() -> Result<()> {
             } => pool::pool_import(secret_name, from_file).await,
             PoolAction::Status { secret_name } => pool::pool_status(secret_name).await,
         },
+        Commands::Dashboard => crate::tui::run_dashboard().await,
         Commands::DaemonInternalRun { bind } => crate::daemon::run_daemon(bind).await,
     }
 }
