@@ -1,0 +1,157 @@
+---
+title: Keystone SaaS
+description: Flexible credential management for teams
+---
+
+# Keystone: SaaS Extension for Birch
+
+Keystone extends Birch with a SaaS offering that provides flexible credential management modes, policy orchestration, team collaboration, and enterprise features—all while maintaining full open-source transparency.
+
+## Overview
+
+Keystone offers three operating modes:
+
+1. **Self-Hosted (OSS)** - Free, unlimited, CLI-only, full control
+2. **SaaS - Hosted Credentials** - Zero management burden, encrypted vault
+3. **SaaS - Customer-Managed Credentials** - Enterprise compliance, credentials stay in your infrastructure
+
+## Getting Started
+
+### Authentication
+
+```bash
+birch saas login
+```
+
+This will prompt you for your API key and configure the CLI for SaaS mode.
+
+### Create a Workspace
+
+```bash
+birch saas workspace create "My Team"
+```
+
+### List Workspaces
+
+```bash
+birch saas workspace list
+```
+
+### Select Active Workspace
+
+```bash
+birch saas workspace select <workspace-id>
+```
+
+## Credential Modes
+
+Keystone supports flexible per-provider credential management:
+
+### Hosted Mode
+
+SaaS stores and manages encrypted credentials:
+
+```bash
+birch saas provider set vercel --mode hosted
+```
+
+### OAuth Mode (Coming Soon)
+
+Use OAuth refresh tokens for automatic credential renewal:
+
+```bash
+birch saas provider set github --mode oauth
+```
+
+### KMS Mode (Coming Soon)
+
+Store credentials in your own AWS/GCP/Azure KMS:
+
+```bash
+birch saas provider set aws --mode kms
+```
+
+### API Key Mode (Coming Soon)
+
+Fetch credentials from your own endpoint:
+
+```bash
+birch saas provider set custom --mode api_key
+```
+
+## Team Collaboration
+
+### Roles
+
+- **Owner** - Full access including billing
+- **Admin** - Full access except billing
+- **Operator** - Can rotate secrets
+- **Viewer** - Read-only access
+- **Auditor** - Access to audit logs only
+
+### Inviting Members
+
+Members can be invited through the API or web dashboard (coming soon).
+
+## Pricing
+
+| Tier | Price | Rotations | Features |
+|------|-------|-----------|----------|
+| Free | $0 | Self-hosted: unlimited<br>SaaS: 100/mo | Basic policies, 1 workspace, email alerts |
+| Starter | $19/mo | 1K/mo | Policies, maintenance windows, Slack alerts, 2 hosted providers, 5 team members |
+| Pro | $49/mo | 10K/mo | All policies, approvals, webhooks, unlimited providers, 3 workspaces, 20 members |
+| Enterprise | Custom | Unlimited | All modes, SSO/SCIM, customer-managed keys, compliance, unlimited workspaces, SLA |
+
+## API Reference
+
+### Authentication
+
+All API requests require authentication via Bearer token:
+
+```bash
+Authorization: Bearer <your-api-key>
+```
+
+### Endpoints
+
+- `POST /api/v1/workspaces` - Create workspace
+- `GET /api/v1/workspaces` - List workspaces
+- `POST /api/v1/workspaces/{id}/providers` - Configure provider
+- `GET /api/v1/workspaces/{id}/credentials/{provider}/{secret}` - Resolve credential
+
+Full API documentation available at [api.keystone.birch.sh/docs](https://api.keystone.birch.sh/docs)
+
+## Security
+
+### Encryption
+
+All credentials are encrypted using ChaCha20Poly1305 with envelope encryption:
+
+- Master key (environment variable)
+- Workspace-specific derived keys
+- Per-credential encryption
+
+### Row Level Security
+
+Database access is protected with PostgreSQL Row Level Security (RLS) policies ensuring complete workspace isolation.
+
+### Audit Logging
+
+All credential access and modifications are logged for compliance and forensics.
+
+## Migration
+
+### From Self-Hosted to SaaS
+
+1. Export your existing configuration
+2. Log in to Keystone: `birch saas login`
+3. Create a workspace: `birch saas workspace create "My Team"`
+4. Configure providers with desired modes
+5. Migrate credentials (manual or via API)
+
+## Support
+
+- Documentation: [docs.birch.sh](https://docs.birch.sh)
+- GitHub Issues: [github.com/plyght/birch/issues](https://github.com/plyght/birch/issues)
+- Enterprise Support: Contact sales@birch.sh
+

@@ -82,6 +82,11 @@ pub enum Commands {
 
     Dashboard,
 
+    Saas {
+        #[command(subcommand)]
+        action: SaasAction,
+    },
+
     #[command(hide = true)]
     DaemonInternalRun {
         #[arg(long, default_value = "127.0.0.1:9123")]
@@ -103,6 +108,39 @@ pub enum DaemonAction {
 pub enum ConfigAction {
     Show,
     Init,
+}
+
+#[derive(Subcommand)]
+pub enum SaasAction {
+    Login {
+        #[arg(long, help = "API URL")]
+        api_url: Option<String>,
+    },
+    Workspace {
+        #[command(subcommand)]
+        action: WorkspaceAction,
+    },
+    Provider {
+        #[command(subcommand)]
+        action: ProviderAction,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum WorkspaceAction {
+    Create { name: String },
+    List,
+    Select { id: String },
+}
+
+#[derive(Subcommand)]
+pub enum ProviderAction {
+    Set {
+        provider: String,
+        #[arg(long, help = "Mode: hosted, oauth, kms, api_key")]
+        mode: String,
+    },
+    List,
 }
 
 #[derive(Subcommand)]
@@ -201,6 +239,20 @@ pub async fn run() -> Result<()> {
             PoolAction::Status { secret_name } => pool::pool_status(secret_name).await,
         },
         Commands::Dashboard => crate::tui::run_dashboard().await,
+        Commands::Saas { action } => match action {
+            SaasAction::Login { api_url } => crate::saas::login(api_url).await,
+            SaasAction::Workspace { action } => match action {
+                WorkspaceAction::Create { name } => crate::saas::workspace_create(name).await,
+                WorkspaceAction::List => crate::saas::workspace_list().await,
+                WorkspaceAction::Select { id } => crate::saas::workspace_select(id).await,
+            },
+            SaasAction::Provider { action } => match action {
+                ProviderAction::Set { provider, mode } => {
+                    crate::saas::provider_set(provider, mode).await
+                }
+                ProviderAction::List => crate::saas::provider_list().await,
+            },
+        },
         Commands::DaemonInternalRun { bind } => crate::daemon::run_daemon(bind).await,
     }
 }

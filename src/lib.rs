@@ -9,5 +9,6 @@ pub mod pool;
 pub mod prod;
 pub mod rollback;
 pub mod rotation;
+pub mod saas;
 pub mod signals;
 pub mod tui;

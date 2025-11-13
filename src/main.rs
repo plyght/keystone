@@ -9,6 +9,7 @@ mod pool;
 mod prod;
 mod rollback;
 mod rotation;
+mod saas;
 mod signals;
 mod tui;
 

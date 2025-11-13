@@ -1,0 +1,48 @@
+[package]
+name = "keystone-api"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "keystone_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "keystone-api"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1.40", features = ["full"] }
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+tokio-postgres = { version = "0.7", features = ["with-uuid-1", "with-chrono-0_4", "with-serde_json-1"] }
+deadpool-postgres = "0.14"
+
+redis = { version = "0.25", features = ["tokio-comp", "connection-manager", "aio"] }
+
+jsonwebtoken = "9.3"
+
+uuid = { version = "1.10", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+chacha20poly1305 = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+hex = "0.4"
+base64 = "0.22"
+
+async-trait = "0.1"
+
+birch = { path = "../../" }
+
+[dev-dependencies]
+tempfile = "3.12"
+

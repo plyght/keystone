@@ -25,6 +25,18 @@ pub struct Config {
 
     #[serde(default)]
     pub connector_auth: ConnectorAuth,
+
+    #[serde(default = "default_mode")]
+    pub mode: String,
+
+    #[serde(default)]
+    pub saas_api_url: Option<String>,
+
+    #[serde(default)]
+    pub saas_api_key: Option<String>,
+
+    #[serde(default)]
+    pub saas_workspace_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -73,6 +85,10 @@ fn default_pool_low_threshold() -> u64 {
     2
 }
 
+fn default_mode() -> String {
+    "self_hosted".to_string()
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -83,6 +99,10 @@ impl Default for Config {
             pool_low_threshold: default_pool_low_threshold(),
             maintenance_windows: Vec::new(),
             connector_auth: ConnectorAuth::default(),
+            mode: default_mode(),
+            saas_api_url: None,
+            saas_api_key: None,
+            saas_workspace_id: None,
         }
     }
 }
