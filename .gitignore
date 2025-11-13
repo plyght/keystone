@@ -1,11 +1,43 @@
+# Rust
 /target/
+
+# Environment files
 .env
 .env.*
 !.env.example
+
+# Birch CLI
 .birch/
 .birch-rollback
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# IDE
 *.swp
 *.swo
 *~
 .DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
 

@@ -1,11 +1,40 @@
-target/
+# Git
 .git/
 .gitignore
+
+# Documentation (keep README.md)
 *.md
 !README.md
+
+# Environment
 .env
 .env.*
-.keystone/
+!.env.example
+
+# Rust
+target/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# IDE & OS
 .DS_Store
 *.swp
+.idea/
+.vscode/
+
+# Birch specific
+.birch/
+.birch-rollback
+.keystone/
 
